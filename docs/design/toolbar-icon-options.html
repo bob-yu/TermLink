@@ -1,0 +1,298 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Toolbar Icon Options</title>
+  <style>
+    :root {
+      --ink: #334155;
+      --muted: #64748b;
+      --blue: #1677ff;
+      --green: #16a34a;
+      --red: #dc2626;
+      --line: #d8dee4;
+      --bg: #f8fafc;
+    }
+    body {
+      margin: 0;
+      padding: 28px;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: #111827;
+      background: #f3f6f9;
+    }
+    h1 {
+      margin: 0 0 18px;
+      font-size: 22px;
+      font-weight: 650;
+    }
+    .option {
+      margin: 0 0 22px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    }
+    .option h2 {
+      margin: 0 0 5px;
+      font-size: 15px;
+    }
+    .option p {
+      margin: 0 0 14px;
+      color: #64748b;
+      font-size: 13px;
+    }
+    .toolbar {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--bg);
+    }
+    .sep {
+      width: 1px;
+      height: 26px;
+      margin: 0 5px;
+      background: #d8dee4;
+    }
+    .btn {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      background: transparent;
+    }
+    .btn:hover {
+      border-color: #cbd5e1;
+      background: #eef2f7;
+    }
+    svg {
+      width: 25px;
+      height: 25px;
+      overflow: visible;
+    }
+    .label-row {
+      display: grid;
+      grid-template-columns: repeat(10, 34px);
+      gap: 5px;
+      margin: 7px 9px 0;
+      color: #64748b;
+      font-size: 10px;
+      text-align: center;
+    }
+    .label-gap {
+      width: 11px;
+    }
+    .stroke {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .thin {
+      stroke-width: 1.7;
+    }
+    .filled {
+      fill: currentColor;
+      stroke: none;
+    }
+    .a { color: var(--ink); }
+    .b { color: var(--blue); }
+    .c { color: var(--ink); }
+    .connect { color: var(--green); }
+    .disconnect { color: var(--red); }
+    .access { color: var(--blue); }
+    .d {
+      color: #1f2937;
+    }
+    .d svg .plate {
+      fill: #ffffff;
+      stroke: #cbd5e1;
+      stroke-width: 1.2;
+    }
+    .d svg .accent {
+      stroke: #1677ff;
+    }
+  </style>
+</head>
+<body>
+  <h1>TermLink Toolbar Icon Options</h1>
+
+  <section class="option">
+    <h2>Option A - Professional Monoline</h2>
+    <p>All icons use the same dark blue-gray line style. Quiet, durable, and desktop-tool oriented.</p>
+    <div class="toolbar a">
+      <span class="btn" title="Scan"><svg viewBox="0 0 24 24"><circle class="stroke" cx="12" cy="12" r="2.2"/><path class="stroke" d="M12 6a6 6 0 0 1 6 6"/><path class="stroke" d="M12 18a6 6 0 0 1-6-6"/><path class="stroke thin" d="M12 3.8a8.2 8.2 0 0 1 8.2 8.2"/><path class="stroke thin" d="M12 20.2A8.2 8.2 0 0 1 3.8 12"/></svg></span>
+      <span class="btn" title="Add"><svg viewBox="0 0 24 24"><path class="stroke" d="M8 5v4"/><path class="stroke" d="M14 5v4"/><path class="stroke" d="M6.8 9h8.4v4.2a4.2 4.2 0 0 1-8.4 0V9Z"/><path class="stroke" d="M11 17.4v2.2"/><path class="stroke" d="M17 14.5h4"/><path class="stroke" d="M19 12.5v4"/></svg></span>
+      <span class="sep"></span>
+      <span class="btn" title="Connect"><svg viewBox="0 0 24 24"><path class="stroke" d="M8 5v4"/><path class="stroke" d="M14 5v4"/><path class="stroke" d="M6.8 9h8.4v4.2a4.2 4.2 0 0 1-8.4 0V9Z"/><path class="stroke" d="M11 17.4v2.2"/><path class="stroke" d="M16 15.5l2.2 2.2L22 13.8"/></svg></span>
+      <span class="btn" title="Disconnect"><svg viewBox="0 0 24 24"><path class="stroke" d="M8 5v4"/><path class="stroke" d="M14 5v4"/><path class="stroke" d="M6.8 9h8.4v4.2a4.2 4.2 0 0 1-8.4 0V9Z"/><path class="stroke" d="M11 17.4v2.2"/><path class="stroke" d="M17 15l4 4"/><path class="stroke" d="M21 15l-4 4"/></svg></span>
+      <span class="sep"></span>
+      <span class="btn" title="Access"><svg viewBox="0 0 24 24"><rect class="stroke" x="5" y="5" width="5.5" height="5.5" rx="1.4"/><rect class="stroke" x="13.5" y="5" width="5.5" height="5.5" rx="1.4"/><rect class="stroke" x="9.2" y="13.5" width="5.5" height="5.5" rx="1.4"/><path class="stroke" d="M10.5 7.8h3"/><path class="stroke" d="M12 10.5v3"/></svg></span>
+      <span class="btn" title="Terminal"><svg viewBox="0 0 24 24"><rect class="stroke" x="4" y="5" width="16" height="13.5" rx="2.2"/><path class="stroke" d="m7.5 9 3 3-3 3"/><path class="stroke" d="M13 15h4"/><circle class="stroke thin" cx="18" cy="18" r="2.3"/></svg></span>
+      <span class="sep"></span>
+      <span class="btn" title="Panel"><svg viewBox="0 0 24 24"><rect class="stroke" x="4" y="4" width="16" height="16" rx="2.4"/><path class="stroke" d="M9.5 4v16"/></svg></span>
+      <span class="btn" title="Logs"><svg viewBox="0 0 24 24"><path class="stroke" d="M7 5h10a2 2 0 0 1 2 2v12H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path class="stroke" d="M8 9h8"/><path class="stroke" d="M8 12.5h8"/><path class="stroke" d="M8 16h5"/></svg></span>
+      <span class="btn" title="Docs"><svg viewBox="0 0 24 24"><path class="stroke" d="M5 6.5A2.5 2.5 0 0 1 7.5 4H11v16H7.5A2.5 2.5 0 0 0 5 22V6.5Z"/><path class="stroke" d="M19 6.5A2.5 2.5 0 0 0 16.5 4H13v16h3.5A2.5 2.5 0 0 1 19 22V6.5Z"/></svg></span>
+      <span class="btn" title="More"><svg viewBox="0 0 24 24"><circle class="filled" cx="7" cy="12" r="1.6"/><circle class="filled" cx="12" cy="12" r="1.6"/><circle class="filled" cx="17" cy="12" r="1.6"/></svg></span>
+    </div>
+  </section>
+
+  <section class="option">
+    <h2>Option B - Brand Blue Monoline</h2>
+    <p>Same shapes as Option A, but unified around the app blue. Stronger brand consistency.</p>
+    <div class="toolbar b">
+      <span class="btn"><svg viewBox="0 0 24 24"><circle class="stroke" cx="12" cy="12" r="2.2"/><path class="stroke" d="M12 6a6 6 0 0 1 6 6"/><path class="stroke" d="M12 18a6 6 0 0 1-6-6"/><path class="stroke thin" d="M12 3.8a8.2 8.2 0 0 1 8.2 8.2"/><path class="stroke thin" d="M12 20.2A8.2 8.2 0 0 1 3.8 12"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><path class="stroke" d="M8 5v4"/><path class="stroke" d="M14 5v4"/><path class="stroke" d="M6.8 9h8.4v4.2a4.2 4.2 0 0 1-8.4 0V9Z"/><path class="stroke" d="M11 17.4v2.2"/><path class="stroke" d="M17 14.5h4"/><path class="stroke" d="M19 12.5v4"/></svg></span>
+      <span class="sep"></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><path class="stroke" d="M8 5v4"/><path class="stroke" d="M14 5v4"/><path class="stroke" d="M6.8 9h8.4v4.2a4.2 4.2 0 0 1-8.4 0V9Z"/><path class="stroke" d="M11 17.4v2.2"/><path class="stroke" d="M16 15.5l2.2 2.2L22 13.8"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><path class="stroke" d="M8 5v4"/><path class="stroke" d="M14 5v4"/><path class="stroke" d="M6.8 9h8.4v4.2a4.2 4.2 0 0 1-8.4 0V9Z"/><path class="stroke" d="M11 17.4v2.2"/><path class="stroke" d="M17 15l4 4"/><path class="stroke" d="M21 15l-4 4"/></svg></span>
+      <span class="sep"></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="stroke" x="5" y="5" width="5.5" height="5.5" rx="1.4"/><rect class="stroke" x="13.5" y="5" width="5.5" height="5.5" rx="1.4"/><rect class="stroke" x="9.2" y="13.5" width="5.5" height="5.5" rx="1.4"/><path class="stroke" d="M10.5 7.8h3"/><path class="stroke" d="M12 10.5v3"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="stroke" x="4" y="5" width="16" height="13.5" rx="2.2"/><path class="stroke" d="m7.5 9 3 3-3 3"/><path class="stroke" d="M13 15h4"/><circle class="stroke thin" cx="18" cy="18" r="2.3"/></svg></span>
+      <span class="sep"></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="stroke" x="4" y="4" width="16" height="16" rx="2.4"/><path class="stroke" d="M9.5 4v16"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><path class="stroke" d="M7 5h10a2 2 0 0 1 2 2v12H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path class="stroke" d="M8 9h8"/><path class="stroke" d="M8 12.5h8"/><path class="stroke" d="M8 16h5"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><path class="stroke" d="M5 6.5A2.5 2.5 0 0 1 7.5 4H11v16H7.5A2.5 2.5 0 0 0 5 22V6.5Z"/><path class="stroke" d="M19 6.5A2.5 2.5 0 0 0 16.5 4H13v16h3.5A2.5 2.5 0 0 1 19 22V6.5Z"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><circle class="filled" cx="7" cy="12" r="1.6"/><circle class="filled" cx="12" cy="12" r="1.6"/><circle class="filled" cx="17" cy="12" r="1.6"/></svg></span>
+    </div>
+  </section>
+
+  <section class="option">
+    <h2>Option C - Monoline With Functional Accents</h2>
+    <p>Mostly professional gray, with color only where it helps: connect, disconnect, and serial access.</p>
+    <div class="toolbar c">
+      <span class="btn"><svg viewBox="0 0 24 24"><circle class="stroke" cx="12" cy="12" r="2.2"/><path class="stroke" d="M12 6a6 6 0 0 1 6 6"/><path class="stroke" d="M12 18a6 6 0 0 1-6-6"/><path class="stroke thin" d="M12 3.8a8.2 8.2 0 0 1 8.2 8.2"/><path class="stroke thin" d="M12 20.2A8.2 8.2 0 0 1 3.8 12"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><path class="stroke" d="M8 5v4"/><path class="stroke" d="M14 5v4"/><path class="stroke" d="M6.8 9h8.4v4.2a4.2 4.2 0 0 1-8.4 0V9Z"/><path class="stroke" d="M11 17.4v2.2"/><path class="stroke" d="M17 14.5h4"/><path class="stroke" d="M19 12.5v4"/></svg></span>
+      <span class="sep"></span>
+      <span class="btn connect"><svg viewBox="0 0 24 24"><path class="stroke" d="M8 5v4"/><path class="stroke" d="M14 5v4"/><path class="stroke" d="M6.8 9h8.4v4.2a4.2 4.2 0 0 1-8.4 0V9Z"/><path class="stroke" d="M11 17.4v2.2"/><path class="stroke" d="M16 15.5l2.2 2.2L22 13.8"/></svg></span>
+      <span class="btn disconnect"><svg viewBox="0 0 24 24"><path class="stroke" d="M8 5v4"/><path class="stroke" d="M14 5v4"/><path class="stroke" d="M6.8 9h8.4v4.2a4.2 4.2 0 0 1-8.4 0V9Z"/><path class="stroke" d="M11 17.4v2.2"/><path class="stroke" d="M17 15l4 4"/><path class="stroke" d="M21 15l-4 4"/></svg></span>
+      <span class="sep"></span>
+      <span class="btn access"><svg viewBox="0 0 24 24"><rect class="stroke" x="5" y="5" width="5.5" height="5.5" rx="1.4"/><rect class="stroke" x="13.5" y="5" width="5.5" height="5.5" rx="1.4"/><rect class="stroke" x="9.2" y="13.5" width="5.5" height="5.5" rx="1.4"/><path class="stroke" d="M10.5 7.8h3"/><path class="stroke" d="M12 10.5v3"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="stroke" x="4" y="5" width="16" height="13.5" rx="2.2"/><path class="stroke" d="m7.5 9 3 3-3 3"/><path class="stroke" d="M13 15h4"/><circle class="stroke thin" cx="18" cy="18" r="2.3"/></svg></span>
+      <span class="sep"></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="stroke" x="4" y="4" width="16" height="16" rx="2.4"/><path class="stroke" d="M9.5 4v16"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><path class="stroke" d="M7 5h10a2 2 0 0 1 2 2v12H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path class="stroke" d="M8 9h8"/><path class="stroke" d="M8 12.5h8"/><path class="stroke" d="M8 16h5"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><path class="stroke" d="M5 6.5A2.5 2.5 0 0 1 7.5 4H11v16H7.5A2.5 2.5 0 0 0 5 22V6.5Z"/><path class="stroke" d="M19 6.5A2.5 2.5 0 0 0 16.5 4H13v16h3.5A2.5 2.5 0 0 1 19 22V6.5Z"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><circle class="filled" cx="7" cy="12" r="1.6"/><circle class="filled" cx="12" cy="12" r="1.6"/><circle class="filled" cx="17" cy="12" r="1.6"/></svg></span>
+    </div>
+  </section>
+
+  <section class="option">
+    <h2>Option D - Hardware Plate</h2>
+    <p>More hardware-inspired. Small white plates keep icons distinct without the heavy colored-tile look.</p>
+    <div class="toolbar d">
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="plate" x="3" y="3" width="18" height="18" rx="4"/><circle class="stroke accent" cx="12" cy="12" r="2"/><path class="stroke" d="M12 6a6 6 0 0 1 6 6"/><path class="stroke" d="M12 18a6 6 0 0 1-6-6"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="plate" x="3" y="3" width="18" height="18" rx="4"/><path class="stroke" d="M8 6v3"/><path class="stroke" d="M14 6v3"/><path class="stroke" d="M7 9h8v4a4 4 0 0 1-8 0V9Z"/><path class="stroke accent" d="M17 14.5h4"/><path class="stroke accent" d="M19 12.5v4"/></svg></span>
+      <span class="sep"></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="plate" x="3" y="3" width="18" height="18" rx="4"/><path class="stroke" d="M8 6v3"/><path class="stroke" d="M14 6v3"/><path class="stroke" d="M7 9h8v4a4 4 0 0 1-8 0V9Z"/><path class="stroke accent" d="M16 15.5l2.2 2.2L22 13.8"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="plate" x="3" y="3" width="18" height="18" rx="4"/><path class="stroke" d="M8 6v3"/><path class="stroke" d="M14 6v3"/><path class="stroke" d="M7 9h8v4a4 4 0 0 1-8 0V9Z"/><path class="stroke accent" d="M17 15l4 4"/><path class="stroke accent" d="M21 15l-4 4"/></svg></span>
+      <span class="sep"></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="plate" x="3" y="3" width="18" height="18" rx="4"/><rect class="stroke" x="5.5" y="5.5" width="5" height="5" rx="1.2"/><rect class="stroke" x="13.5" y="5.5" width="5" height="5" rx="1.2"/><rect class="stroke accent" x="9.5" y="13.5" width="5" height="5" rx="1.2"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="plate" x="3" y="3" width="18" height="18" rx="4"/><rect class="stroke" x="5" y="6" width="14" height="11" rx="2"/><path class="stroke accent" d="m8 9 2.5 2.5L8 14"/><path class="stroke" d="M13 14h3"/></svg></span>
+      <span class="sep"></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="plate" x="3" y="3" width="18" height="18" rx="4"/><rect class="stroke" x="5" y="5" width="14" height="14" rx="2"/><path class="stroke accent" d="M10 5v14"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="plate" x="3" y="3" width="18" height="18" rx="4"/><path class="stroke" d="M7 6h10v12H7Z"/><path class="stroke accent" d="M9 9h6"/><path class="stroke accent" d="M9 12h6"/><path class="stroke accent" d="M9 15h3"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="plate" x="3" y="3" width="18" height="18" rx="4"/><path class="stroke" d="M6 7a2 2 0 0 1 2-2h3v14H8a2 2 0 0 0-2 2V7Z"/><path class="stroke" d="M18 7a2 2 0 0 0-2-2h-3v14h3a2 2 0 0 1 2 2V7Z"/></svg></span>
+      <span class="btn"><svg viewBox="0 0 24 24"><rect class="plate" x="3" y="3" width="18" height="18" rx="4"/><circle class="filled" cx="8" cy="12" r="1.5"/><circle class="filled" cx="12" cy="12" r="1.5"/><circle class="filled" cx="16" cy="12" r="1.5"/></svg></span>
+    </div>
+  </section>
+
+  <section class="option">
+    <h2>Alternative Core Actions - No Plug</h2>
+    <p>Different Add / Connect / Disconnect concepts without plug shapes. These are better for a tool that handles local serial, remote serial, SSH, and Telnet sessions.</p>
+    <div class="toolbar c">
+      <span class="btn" title="Add: terminal plus">
+        <svg viewBox="0 0 24 24">
+          <rect class="stroke" x="4" y="5" width="13.5" height="12.5" rx="2.2"/>
+          <path class="stroke" d="m7.2 9 2.6 2.6-2.6 2.6"/>
+          <path class="stroke" d="M12 14.2h2.5"/>
+          <path class="stroke access" d="M18.5 13.2v5.6"/>
+          <path class="stroke access" d="M15.7 16h5.6"/>
+        </svg>
+      </span>
+      <span class="btn" title="Add: tab plus">
+        <svg viewBox="0 0 24 24">
+          <path class="stroke" d="M4.5 7.5h5.2l2 2H19a2 2 0 0 1 2 2v5.8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5a2 2 0 0 1 1.5-2Z"/>
+          <path class="stroke access" d="M12 13.2v4.6"/>
+          <path class="stroke access" d="M9.7 15.5h4.6"/>
+        </svg>
+      </span>
+      <span class="btn" title="Add: node plus">
+        <svg viewBox="0 0 24 24">
+          <circle class="stroke" cx="7" cy="12" r="2.4"/>
+          <circle class="stroke" cx="15" cy="7" r="2.4"/>
+          <circle class="stroke" cx="15" cy="17" r="2.4"/>
+          <path class="stroke" d="M9.1 10.8 12.9 8.2"/>
+          <path class="stroke" d="M9.1 13.2 12.9 15.8"/>
+          <path class="stroke access" d="M19.5 12.2v5.4"/>
+          <path class="stroke access" d="M16.8 14.9h5.4"/>
+        </svg>
+      </span>
+
+      <span class="sep"></span>
+
+      <span class="btn connect" title="Connect: link check">
+        <svg viewBox="0 0 24 24">
+          <path class="stroke" d="M9.4 8.5h-1a4 4 0 0 0 0 8h3"/>
+          <path class="stroke" d="M14.6 15.5h1a4 4 0 0 0 0-8h-3"/>
+          <path class="stroke" d="M9.5 12h5"/>
+          <path class="stroke" d="m15.8 17.2 2 2 3.7-4"/>
+        </svg>
+      </span>
+      <span class="btn connect" title="Connect: nodes linked">
+        <svg viewBox="0 0 24 24">
+          <circle class="stroke" cx="6.5" cy="12" r="3"/>
+          <circle class="stroke" cx="17.5" cy="12" r="3"/>
+          <path class="stroke" d="M9.5 12h5"/>
+          <path class="stroke" d="m15.8 17.2 2 2 3.7-4"/>
+        </svg>
+      </span>
+      <span class="btn connect" title="Connect: route active">
+        <svg viewBox="0 0 24 24">
+          <circle class="stroke" cx="5.8" cy="17.2" r="2.4"/>
+          <circle class="stroke" cx="18.2" cy="6.8" r="2.4"/>
+          <path class="stroke" d="M8 15.6c3.5-2.3 5.5-5.1 8-7.3"/>
+          <path class="stroke" d="m15.7 17 1.8 1.8 3.5-3.8"/>
+        </svg>
+      </span>
+
+      <span class="sep"></span>
+
+      <span class="btn disconnect" title="Disconnect: link off">
+        <svg viewBox="0 0 24 24">
+          <path class="stroke" d="M8.8 8.5h-.4a4 4 0 0 0 0 8h2.2"/>
+          <path class="stroke" d="M15.2 15.5h.4a4 4 0 0 0 0-8h-2.2"/>
+          <path class="stroke" d="M10 12h4"/>
+          <path class="stroke" d="M5 5l14 14"/>
+        </svg>
+      </span>
+      <span class="btn disconnect" title="Disconnect: broken nodes">
+        <svg viewBox="0 0 24 24">
+          <circle class="stroke" cx="6.5" cy="12" r="3"/>
+          <circle class="stroke" cx="17.5" cy="12" r="3"/>
+          <path class="stroke" d="M9.5 12h2"/>
+          <path class="stroke" d="M13.5 12h1"/>
+          <path class="stroke" d="M16 16l4 4"/>
+          <path class="stroke" d="m20 16-4 4"/>
+        </svg>
+      </span>
+      <span class="btn disconnect" title="Disconnect: route blocked">
+        <svg viewBox="0 0 24 24">
+          <circle class="stroke" cx="5.8" cy="17.2" r="2.4"/>
+          <circle class="stroke" cx="18.2" cy="6.8" r="2.4"/>
+          <path class="stroke" d="M8 15.6c2.2-1.4 3.8-3 5.3-4.6"/>
+          <path class="stroke" d="M15.8 15.8 20 20"/>
+          <path class="stroke" d="m20 15.8-4.2 4.2"/>
+        </svg>
+      </span>
+    </div>
+  </section>
+</body>
+</html>
+

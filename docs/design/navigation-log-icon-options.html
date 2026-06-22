@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Navigation And Log Icon Options</title>
+  <style>
+    :root {
+      --ink: #334155;
+      --muted: #64748b;
+      --line: #d8dee4;
+      --bg: #f8fafc;
+    }
+    body {
+      margin: 0;
+      padding: 28px;
+      color: #111827;
+      background: #f3f6f9;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      font-weight: 650;
+    }
+    p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .card {
+      margin-bottom: 20px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    }
+    h2 {
+      margin: 0 0 12px;
+      font-size: 15px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      max-width: 760px;
+    }
+    .tile {
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      padding: 14px 10px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+      text-align: center;
+    }
+    .button {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: var(--bg);
+    }
+    .button:hover {
+      border-color: #cbd5e1;
+      background: #eef2f7;
+    }
+    svg {
+      width: 30px;
+      height: 30px;
+      overflow: visible;
+    }
+    .stroke {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .thin {
+      stroke-width: 1.65;
+    }
+    .fill {
+      fill: currentColor;
+      stroke: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Connections And Runtime Log Icon Options</h1>
+  <p>Focused options for the toolbar buttons that toggle the left navigation panel and bottom runtime log panel.</p>
+
+  <section class="card">
+    <h2>Connections / Navigation</h2>
+    <div class="grid">
+      <div class="tile">
+        <div class="button">
+          <svg viewBox="0 0 24 24">
+            <rect class="stroke" x="4" y="4" width="16" height="16" rx="2.5"/>
+            <path class="stroke" d="M9.2 4v16"/>
+            <path class="stroke thin" d="M12.2 8h4.8"/>
+            <path class="stroke thin" d="M12.2 12h4.8"/>
+            <path class="stroke thin" d="M12.2 16h3.2"/>
+            <circle class="fill" cx="6.7" cy="8" r=".9"/>
+            <circle class="fill" cx="6.7" cy="12" r=".9"/>
+            <circle class="fill" cx="6.7" cy="16" r=".9"/>
+          </svg>
+        </div>
+        Sidebar + session list
+      </div>
+
+      <div class="tile">
+        <div class="button">
+          <svg viewBox="0 0 24 24">
+            <rect class="stroke" x="4" y="4" width="16" height="16" rx="2.5"/>
+            <path class="stroke" d="M9.6 4v16"/>
+            <path class="stroke thin" d="M6.4 8h1.3"/>
+            <path class="stroke thin" d="M6.4 12h1.3"/>
+            <path class="stroke thin" d="M6.4 16h1.3"/>
+            <path class="stroke thin" d="M12.2 8.2h4.6"/>
+            <path class="stroke thin" d="M12.2 12h4.6"/>
+            <path class="stroke thin" d="M12.2 15.8h4.6"/>
+          </svg>
+        </div>
+        Layout panel
+      </div>
+
+      <div class="tile">
+        <div class="button">
+          <svg viewBox="0 0 24 24">
+            <circle class="stroke" cx="7" cy="7" r="2.3"/>
+            <circle class="stroke" cx="17" cy="7" r="2.3"/>
+            <circle class="stroke" cx="7" cy="17" r="2.3"/>
+            <circle class="stroke" cx="17" cy="17" r="2.3"/>
+            <path class="stroke" d="M9.3 7h5.4"/>
+            <path class="stroke" d="M7 9.3v5.4"/>
+            <path class="stroke" d="M17 9.3v5.4"/>
+            <path class="stroke" d="M9.3 17h5.4"/>
+          </svg>
+        </div>
+        Connection tree
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Runtime Log</h2>
+    <div class="grid">
+      <div class="tile">
+        <div class="button">
+          <svg viewBox="0 0 24 24">
+            <path class="stroke" d="M7 4.8h10a2 2 0 0 1 2 2v12.4H7a2 2 0 0 1-2-2V6.8a2 2 0 0 1 2-2Z"/>
+            <circle class="fill" cx="8.4" cy="9" r=".8"/>
+            <circle class="fill" cx="8.4" cy="12.5" r=".8"/>
+            <circle class="fill" cx="8.4" cy="16" r=".8"/>
+            <path class="stroke thin" d="M11 9h5"/>
+            <path class="stroke thin" d="M11 12.5h5"/>
+            <path class="stroke thin" d="M11 16h3.5"/>
+          </svg>
+        </div>
+        Log document + bullets
+      </div>
+
+      <div class="tile">
+        <div class="button">
+          <svg viewBox="0 0 24 24">
+            <rect class="stroke" x="4" y="5" width="16" height="14" rx="2.4"/>
+            <path class="stroke" d="m7.4 9.2 2.5 2.3-2.5 2.3"/>
+            <path class="stroke thin" d="M12.5 10h4"/>
+            <path class="stroke thin" d="M12.5 13.5h4"/>
+            <path class="stroke thin" d="M7.5 16.5h9"/>
+          </svg>
+        </div>
+        Terminal output log
+      </div>
+
+      <div class="tile">
+        <div class="button">
+          <svg viewBox="0 0 24 24">
+            <path class="stroke" d="M8 4h8a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V7a3 3 0 0 1 3-3Z"/>
+            <path class="stroke thin" d="M8.5 8.5h6.5"/>
+            <path class="stroke thin" d="M8.5 12h6.5"/>
+            <path class="stroke thin" d="M8.5 15.5h4.2"/>
+            <path class="stroke" d="M6 18h12"/>
+          </svg>
+        </div>
+        Scroll log sheet
+      </div>
+    </div>
+  </section>
+</body>
+</html>

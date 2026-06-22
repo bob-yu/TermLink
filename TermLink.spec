@@ -1,0 +1,104 @@
+﻿# -*- mode: python ; coding: utf-8 -*-
+
+datas = [('config.example.json', '.'), ('docs', 'docs'), ('ui/resources', 'ui/resources'), ('assets/app-icon.ico', '.')]
+binaries = []
+hiddenimports = [
+    'PyQt5.sip',
+    'PyQt5.QtCore',
+    'PyQt5.QtGui',
+    'PyQt5.QtWidgets',
+    'PyQt5.QtSvg',
+    'serial',
+    'serial.tools',
+    'serial.tools.list_ports',
+    'serial.tools.list_ports_common',
+    'serial.tools.list_ports_windows',
+    'serial.tools.list_ports_linux',
+    'serial.tools.list_ports_posix',
+    'pyte',
+    'pyte.screens',
+    'pyte.streams',
+    'pyte.graphics',
+    'pyte.modes',
+    'paramiko',
+    'paramiko.transport',
+    'paramiko.channel',
+    'paramiko.client',
+    'paramiko.ssh_exception',
+    'cryptography',
+    'cryptography.hazmat.primitives.ciphers',
+    'cffi',
+    'nacl',
+    'bcrypt',
+]
+
+excludes = [
+    'PyQt5.QtBluetooth',
+    'PyQt5.QtDesigner',
+    'PyQt5.QtHelp',
+    'PyQt5.QtLocation',
+    'PyQt5.QtMultimedia',
+    'PyQt5.QtMultimediaWidgets',
+    'PyQt5.QtNetworkAuth',
+    'PyQt5.QtNfc',
+    'PyQt5.QtOpenGL',
+    'PyQt5.QtPositioning',
+    'PyQt5.QtQml',
+    'PyQt5.QtQuick',
+    'PyQt5.QtQuickWidgets',
+    'PyQt5.QtSql',
+    'PyQt5.QtTest',
+    'PyQt5.QtWebChannel',
+    'PyQt5.QtWebEngine',
+    'PyQt5.QtWebEngineCore',
+    'PyQt5.QtWebEngineWidgets',
+    'PyQt5.QtXmlPatterns',
+    'tkinter',
+    'unittest',
+    'pydoc',
+]
+
+
+a = Analysis(
+    ['main.py'],
+    pathex=[],
+    binaries=binaries,
+    datas=datas,
+    hiddenimports=hiddenimports,
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=excludes,
+    noarchive=False,
+    optimize=1,
+)
+pyz = PYZ(a.pure)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    [],
+    exclude_binaries=True,
+    name='TermLink',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+    icon='assets/app-icon.ico',
+)
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='TermLink',
+)
+

@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Route Flow Toolbar Preview</title>
+  <style>
+    :root {
+      --ink: #334155;
+      --muted: #64748b;
+      --blue: #1677ff;
+      --green: #16a34a;
+      --red: #dc2626;
+      --cyan: #0891b2;
+      --purple: #7c3aed;
+      --line: #d8dee4;
+      --bg: #f8fafc;
+    }
+    body {
+      margin: 0;
+      padding: 28px;
+      color: #111827;
+      background: #f3f6f9;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      font-weight: 650;
+    }
+    p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .card {
+      padding: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+      margin-bottom: 20px;
+    }
+    .toolbar {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--bg);
+    }
+    .btn {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      background: transparent;
+    }
+    .btn:hover {
+      border-color: #cbd5e1;
+      background: #eef2f7;
+    }
+    .sep {
+      width: 1px;
+      height: 28px;
+      margin: 0 6px;
+      background: var(--line);
+    }
+    svg {
+      width: 28px;
+      height: 28px;
+      overflow: visible;
+    }
+    .stroke {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .thin { stroke-width: 1.65; }
+    .fill { fill: currentColor; stroke: none; }
+    .ink { color: var(--ink); }
+    .blue { color: var(--blue); }
+    .green { color: var(--green); }
+    .red { color: var(--red); }
+    .cyan { color: var(--cyan); }
+    .purple { color: var(--purple); }
+    .labels {
+      display: grid;
+      grid-template-columns: repeat(10, 68px);
+      gap: 4px;
+      margin-top: 12px;
+      color: #64748b;
+      font-size: 11px;
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(126px, 1fr));
+      gap: 12px;
+      max-width: 980px;
+    }
+    .tile {
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      padding: 12px 8px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+    }
+    .tile .btn {
+      background: #f8fafc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Route Flow Toolbar Preview</h1>
+  <p>Full toolbar concept using the same route/node line language selected for Add, Connect, and Disconnect.</p>
+
+  <section class="card">
+    <div class="toolbar">
+      <span class="btn blue" title="Scan Ports">
+        <svg viewBox="0 0 24 24">
+          <circle class="stroke" cx="5.8" cy="17.2" r="2.4"/>
+          <circle class="stroke" cx="18.2" cy="6.8" r="2.4"/>
+          <path class="stroke" d="M8 15.6c2.3-1.5 4-3.1 5.5-4.9"/>
+          <path class="stroke" d="M15.2 6.8h3"/>
+          <path class="stroke" d="M18.2 3.8v3"/>
+          <path class="stroke thin" d="M12 4.5a7.6 7.6 0 0 1 7.5 7.5"/>
+          <path class="stroke thin" d="M12 19.5A7.6 7.6 0 0 1 4.5 12"/>
+        </svg>
+      </span>
+      <span class="btn blue" title="Add Serial">
+        <svg viewBox="0 0 24 24">
+          <circle class="stroke" cx="5.8" cy="17.2" r="2.5"/>
+          <circle class="stroke" cx="17.8" cy="6.8" r="2.5"/>
+          <path class="stroke" d="M8 15.6c3.4-2.2 5.5-5.2 7.8-7.2"/>
+          <path class="stroke" d="M18.8 14v6"/>
+          <path class="stroke" d="M15.8 17h6"/>
+        </svg>
+      </span>
+
+      <span class="sep"></span>
+
+      <span class="btn green" title="Connect All">
+        <svg viewBox="0 0 24 24">
+          <circle class="stroke" cx="5.8" cy="17.2" r="2.5"/>
+          <circle class="stroke" cx="17.8" cy="6.8" r="2.5"/>
+          <path class="stroke" d="M8 15.6c3.4-2.2 5.5-5.2 7.8-7.2"/>
+          <path class="stroke" d="m15.4 17.2 1.8 1.8 3.7-4"/>
+        </svg>
+      </span>
+      <span class="btn red" title="Disconnect All">
+        <svg viewBox="0 0 24 24">
+          <circle class="stroke" cx="5.8" cy="17.2" r="2.5"/>
+          <circle class="stroke" cx="17.8" cy="6.8" r="2.5"/>
+          <path class="stroke" d="M8 15.6c2.2-1.4 3.7-3 5.2-4.6"/>
+          <path class="stroke" d="M16 16l4 4"/>
+          <path class="stroke" d="m20 16-4 4"/>
+        </svg>
+      </span>
+
+      <span class="sep"></span>
+
+      <span class="btn purple" title="Serial Access">
+        <svg viewBox="0 0 24 24">
+          <circle class="stroke" cx="6.2" cy="7.2" r="2.3"/>
+          <circle class="stroke" cx="17.8" cy="7.2" r="2.3"/>
+          <circle class="stroke" cx="12" cy="17.2" r="2.3"/>
+          <path class="stroke" d="M8.3 8.2 10.6 15"/>
+          <path class="stroke" d="M15.7 8.2 13.4 15"/>
+          <path class="stroke" d="M8.5 7.2h7"/>
+        </svg>
+      </span>
+      <span class="btn ink" title="Terminal Settings">
+        <svg viewBox="0 0 24 24">
+          <rect class="stroke" x="4" y="5" width="15" height="12.5" rx="2.2"/>
+          <path class="stroke" d="m7.3 9 2.5 2.5L7.3 14"/>
+          <path class="stroke" d="M12.4 14h3"/>
+          <circle class="stroke" cx="18" cy="18" r="2.4"/>
+          <path class="stroke thin" d="M18 14.6v1"/>
+          <path class="stroke thin" d="M18 20.4v1"/>
+          <path class="stroke thin" d="M14.6 18h1"/>
+          <path class="stroke thin" d="M20.4 18h1"/>
+        </svg>
+      </span>
+
+      <span class="sep"></span>
+
+      <span class="btn ink" title="Connections">
+        <svg viewBox="0 0 24 24">
+          <rect class="stroke" x="4" y="4" width="16" height="16" rx="2.4"/>
+          <path class="stroke" d="M9.4 4v16"/>
+          <circle class="fill" cx="6.8" cy="8" r="1"/>
+          <circle class="fill" cx="6.8" cy="12" r="1"/>
+          <circle class="fill" cx="6.8" cy="16" r="1"/>
+        </svg>
+      </span>
+      <span class="btn cyan" title="Runtime Log">
+        <svg viewBox="0 0 24 24">
+          <path class="stroke" d="M7 5h10a2 2 0 0 1 2 2v12H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/>
+          <path class="stroke" d="M8.5 9h7"/>
+          <path class="stroke" d="M8.5 12.5h7"/>
+          <path class="stroke" d="M8.5 16h4.5"/>
+        </svg>
+      </span>
+
+      <span class="sep"></span>
+
+      <span class="btn blue" title="Documentation">
+        <svg viewBox="0 0 24 24">
+          <path class="stroke" d="M5 6.5A2.5 2.5 0 0 1 7.5 4H11v16H7.5A2.5 2.5 0 0 0 5 22V6.5Z"/>
+          <path class="stroke" d="M19 6.5A2.5 2.5 0 0 0 16.5 4H13v16h3.5A2.5 2.5 0 0 1 19 22V6.5Z"/>
+          <path class="stroke thin" d="M8 8h1.8"/>
+          <path class="stroke thin" d="M14.2 8H16"/>
+        </svg>
+      </span>
+      <span class="btn ink" title="More">
+        <svg viewBox="0 0 24 24">
+          <circle class="fill" cx="7" cy="12" r="1.7"/>
+          <circle class="fill" cx="12" cy="12" r="1.7"/>
+          <circle class="fill" cx="17" cy="12" r="1.7"/>
+        </svg>
+      </span>
+    </div>
+  </section>
+
+  <section class="card">
+    <p>Individual icons with names:</p>
+    <div class="grid">
+      <div class="tile blue"><div class="btn"><svg viewBox="0 0 24 24"><circle class="stroke" cx="5.8" cy="17.2" r="2.4"/><circle class="stroke" cx="18.2" cy="6.8" r="2.4"/><path class="stroke" d="M8 15.6c2.3-1.5 4-3.1 5.5-4.9"/><path class="stroke" d="M15.2 6.8h3"/><path class="stroke" d="M18.2 3.8v3"/><path class="stroke thin" d="M12 4.5a7.6 7.6 0 0 1 7.5 7.5"/><path class="stroke thin" d="M12 19.5A7.6 7.6 0 0 1 4.5 12"/></svg></div>Scan Ports</div>
+      <div class="tile blue"><div class="btn"><svg viewBox="0 0 24 24"><circle class="stroke" cx="5.8" cy="17.2" r="2.5"/><circle class="stroke" cx="17.8" cy="6.8" r="2.5"/><path class="stroke" d="M8 15.6c3.4-2.2 5.5-5.2 7.8-7.2"/><path class="stroke" d="M18.8 14v6"/><path class="stroke" d="M15.8 17h6"/></svg></div>Add Serial</div>
+      <div class="tile green"><div class="btn"><svg viewBox="0 0 24 24"><circle class="stroke" cx="5.8" cy="17.2" r="2.5"/><circle class="stroke" cx="17.8" cy="6.8" r="2.5"/><path class="stroke" d="M8 15.6c3.4-2.2 5.5-5.2 7.8-7.2"/><path class="stroke" d="m15.4 17.2 1.8 1.8 3.7-4"/></svg></div>Connect All</div>
+      <div class="tile red"><div class="btn"><svg viewBox="0 0 24 24"><circle class="stroke" cx="5.8" cy="17.2" r="2.5"/><circle class="stroke" cx="17.8" cy="6.8" r="2.5"/><path class="stroke" d="M8 15.6c2.2-1.4 3.7-3 5.2-4.6"/><path class="stroke" d="M16 16l4 4"/><path class="stroke" d="m20 16-4 4"/></svg></div>Disconnect All</div>
+      <div class="tile purple"><div class="btn"><svg viewBox="0 0 24 24"><circle class="stroke" cx="6.2" cy="7.2" r="2.3"/><circle class="stroke" cx="17.8" cy="7.2" r="2.3"/><circle class="stroke" cx="12" cy="17.2" r="2.3"/><path class="stroke" d="M8.3 8.2 10.6 15"/><path class="stroke" d="M15.7 8.2 13.4 15"/><path class="stroke" d="M8.5 7.2h7"/></svg></div>Serial Access</div>
+      <div class="tile ink"><div class="btn"><svg viewBox="0 0 24 24"><rect class="stroke" x="4" y="5" width="15" height="12.5" rx="2.2"/><path class="stroke" d="m7.3 9 2.5 2.5L7.3 14"/><path class="stroke" d="M12.4 14h3"/><circle class="stroke" cx="18" cy="18" r="2.4"/><path class="stroke thin" d="M18 14.6v1"/><path class="stroke thin" d="M18 20.4v1"/><path class="stroke thin" d="M14.6 18h1"/><path class="stroke thin" d="M20.4 18h1"/></svg></div>Terminal Settings</div>
+      <div class="tile ink"><div class="btn"><svg viewBox="0 0 24 24"><rect class="stroke" x="4" y="4" width="16" height="16" rx="2.4"/><path class="stroke" d="M9.4 4v16"/><circle class="fill" cx="6.8" cy="8" r="1"/><circle class="fill" cx="6.8" cy="12" r="1"/><circle class="fill" cx="6.8" cy="16" r="1"/></svg></div>Connections</div>
+      <div class="tile cyan"><div class="btn"><svg viewBox="0 0 24 24"><path class="stroke" d="M7 5h10a2 2 0 0 1 2 2v12H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path class="stroke" d="M8.5 9h7"/><path class="stroke" d="M8.5 12.5h7"/><path class="stroke" d="M8.5 16h4.5"/></svg></div>Runtime Log</div>
+      <div class="tile blue"><div class="btn"><svg viewBox="0 0 24 24"><path class="stroke" d="M5 6.5A2.5 2.5 0 0 1 7.5 4H11v16H7.5A2.5 2.5 0 0 0 5 22V6.5Z"/><path class="stroke" d="M19 6.5A2.5 2.5 0 0 0 16.5 4H13v16h3.5A2.5 2.5 0 0 1 19 22V6.5Z"/><path class="stroke thin" d="M8 8h1.8"/><path class="stroke thin" d="M14.2 8H16"/></svg></div>Documentation</div>
+      <div class="tile ink"><div class="btn"><svg viewBox="0 0 24 24"><circle class="fill" cx="7" cy="12" r="1.7"/><circle class="fill" cx="12" cy="12" r="1.7"/><circle class="fill" cx="17" cy="12" r="1.7"/></svg></div>More</div>
+    </div>
+  </section>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remote Access</title>
+<style>
+body {
+    color: #202124;
+    font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+    line-height: 1.65;
+    margin: 0;
+    background: #f6f7f9;
+}
+.page {
+    box-sizing: border-box;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 32px 28px 56px;
+    background: #ffffff;
+    min-height: 100vh;
+}
+nav {
+    border-bottom: 1px solid #dfe3e8;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+}
+nav a {
+    color: #1557b0;
+    margin-right: 18px;
+    text-decoration: none;
+    font-weight: 600;
+}
+h1, h2, h3 {
+    color: #1f2937;
+    line-height: 1.25;
+}
+h1 { font-size: 30px; margin-top: 0; }
+h2 { border-top: 1px solid #edf0f2; margin-top: 34px; padding-top: 20px; }
+code {
+    background: #f1f3f5;
+    border-radius: 4px;
+    padding: 1px 5px;
+}
+pre {
+    background: #111827;
+    border-radius: 6px;
+    color: #f9fafb;
+    overflow-x: auto;
+    padding: 14px 16px;
+}
+pre code {
+    background: transparent;
+    padding: 0;
+}
+table {
+    border-collapse: collapse;
+    margin: 14px 0 22px;
+    width: 100%;
+}
+th, td {
+    border: 1px solid #d7dce2;
+    padding: 8px 10px;
+    text-align: left;
+}
+th { background: #f3f5f7; }
+blockquote {
+    border-left: 4px solid #9fb7d9;
+    color: #4b5563;
+    margin-left: 0;
+    padding-left: 14px;
+}
+</style>
+</head>
+<body><main class="page"><nav><a href="index.html">Home</a><a href="user-guide.html">User Guide</a><a href="architecture.html">Architecture</a><a href="remote-access.html">Remote Access</a><a href="automation.html">Automation</a><a href="logging.html">Logging</a><a href="troubleshooting.html">Troubleshooting</a></nav><h1>Remote Access</h1>
+<p>Remote Access lets one TermLink instance expose local serial ports to other TermLink clients, CLI clients, and MCP clients.</p>
+<h2>Concepts</h2>
+<table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>Server</td><td>The TermLink instance physically connected to serial devices.</td></tr><tr><td>Client</td><td>A GUI, CLI, or MCP client connecting to the server.</td></tr><tr><td>Local serial</td><td>A serial port opened on the server machine.</td></tr><tr><td>Remote serial</td><td>A client-side terminal tab mapped to a server-side local serial port.</td></tr><tr><td>Proxy client</td><td>A client currently connected to this machine&#x27;s Serial Access server.</td></tr></tbody></table>
+<h2>Server Workflow</h2>
+<ol><li>Open <code>Settings &gt; Serial Remote Access Settings</code>.</li><li>Enable the server.</li><li>Set listen host and port.</li><li>Set the access password.</li><li>Set max clients and default permission.</li><li>Add and connect the local serial ports you want to expose.</li></ol>
+<p>The server does not automatically scan, add, or connect every serial port. This avoids accidentally occupying devices.</p>
+<h2>Client Workflow</h2>
+<ol><li>Click <code>Add Connection &gt; Remote Serial</code>.</li><li>Enter server address, for example:</li></ol>
+<pre><code class="language-text">192.168.1.20:56337</code></pre>
+<ol><li>Enter the server password.</li><li>Select one or more remote ports from the returned list.</li><li>TermLink creates remote serial tabs for the selected ports.</li></ol>
+<p>If a selected port is already opened for that server, it is shown as opened and cannot be added again.</p>
+<h2>Multiple Remote Servers</h2>
+<p>One TermLink client can connect to multiple remote servers at the same time.</p>
+<p>The Connections panel groups remote ports by server:</p>
+<pre><code class="language-text">Remote
+  127.0.0.1:56337
+    COM12 [Connected]
+    COM5 [Disconnected]
+  192.168.1.20:56337
+    ttyUSB0 [Connected]</code></pre>
+<p>The internal session key includes both server and port:</p>
+<pre><code class="language-text">remote://127.0.0.1:56337/COM12</code></pre>
+<p>This prevents collisions when different servers expose the same port name.</p>
+<h2>Access Control</h2>
+<p>Open:</p>
+<pre><code class="language-text">Settings &gt; Serial Remote Access Control</code></pre>
+<p>Use this panel to:</p>
+<ul><li>View connected clients.</li><li>Disconnect a client.</li><li>Ban an IP address.</li><li>Unban an IP address.</li><li>Set a client to read-only.</li><li>Set a client to read-write.</li></ul>
+<p>Access control applies to GUI remote clients, CLI clients, and MCP clients.</p>
+<h2>Passwords</h2>
+<p>There are two password fields with different roles:</p>
+<table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td>Server access password</td><td>Password required when this TermLink instance acts as server.</td></tr><tr><td>Remote Serial password</td><td>Password this TermLink instance uses when connecting to another server.</td></tr></tbody></table>
+<p>Changing the server password should not automatically change the client password.</p>
+<h2>Permissions</h2>
+<table><thead><tr><th>Permission</th><th>Allowed</th></tr></thead><tbody><tr><td>Read-only</td><td>list, state, watch, log, GUI receive</td></tr><tr><td>Read-write</td><td>read operations plus write, command, break, GUI input</td></tr></tbody></table>
+<p>If a client is banned or disconnected by the server, the GUI should show a connection error instead of silently removing the session.</p>
+<h2>Firewall Notes</h2>
+<p>The server listens on one TCP port. The default is:</p>
+<pre><code class="language-text">56337</code></pre>
+<p>Windows example:</p>
+<pre><code class="language-powershell">netsh advfirewall firewall add rule name=&quot;TermLink&quot; dir=in action=allow protocol=tcp localport=56337</code></pre>
+<p>Linux example:</p>
+<pre><code class="language-bash">sudo ufw allow 56337/tcp</code></pre>
+<h2>Data Flow</h2>
+<pre><code class="language-text">Client terminal input
+  -&gt; SerialAccessClient
+  -&gt; TCP connection
+  -&gt; SerialAccessServer
+  -&gt; Local SerialWorker
+  -&gt; Physical serial device
+
+Physical serial output
+  -&gt; Local SerialWorker
+  -&gt; SerialAccessServer
+  -&gt; GUI remote terminals
+  -&gt; CLI/MCP ring-buffer reads</code></pre>
+<p>GUI remote terminals receive realtime pushed data. CLI and MCP read from the server-side ring buffer.</p></main></body>
+</html>

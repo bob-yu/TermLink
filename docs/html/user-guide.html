@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Guide</title>
+<style>
+body {
+    color: #202124;
+    font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+    line-height: 1.65;
+    margin: 0;
+    background: #f6f7f9;
+}
+.page {
+    box-sizing: border-box;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 32px 28px 56px;
+    background: #ffffff;
+    min-height: 100vh;
+}
+nav {
+    border-bottom: 1px solid #dfe3e8;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+}
+nav a {
+    color: #1557b0;
+    margin-right: 18px;
+    text-decoration: none;
+    font-weight: 600;
+}
+h1, h2, h3 {
+    color: #1f2937;
+    line-height: 1.25;
+}
+h1 { font-size: 30px; margin-top: 0; }
+h2 { border-top: 1px solid #edf0f2; margin-top: 34px; padding-top: 20px; }
+code {
+    background: #f1f3f5;
+    border-radius: 4px;
+    padding: 1px 5px;
+}
+pre {
+    background: #111827;
+    border-radius: 6px;
+    color: #f9fafb;
+    overflow-x: auto;
+    padding: 14px 16px;
+}
+pre code {
+    background: transparent;
+    padding: 0;
+}
+table {
+    border-collapse: collapse;
+    margin: 14px 0 22px;
+    width: 100%;
+}
+th, td {
+    border: 1px solid #d7dce2;
+    padding: 8px 10px;
+    text-align: left;
+}
+th { background: #f3f5f7; }
+blockquote {
+    border-left: 4px solid #9fb7d9;
+    color: #4b5563;
+    margin-left: 0;
+    padding-left: 14px;
+}
+</style>
+</head>
+<body><main class="page"><nav><a href="index.html">Home</a><a href="user-guide.html">User Guide</a><a href="architecture.html">Architecture</a><a href="remote-access.html">Remote Access</a><a href="automation.html">Automation</a><a href="logging.html">Logging</a><a href="troubleshooting.html">Troubleshooting</a></nav><h1>User Guide</h1>
+<h2>Start TermLink</h2>
+<p>Run from source:</p>
+<pre><code class="language-bash">python main.py</code></pre>
+<p>Or use the packaged executable:</p>
+<pre><code class="language-bash">TermLink.exe</code></pre>
+<p>TermLink does not automatically open serial ports. Add and connect sessions manually.</p>
+<h2>Main Window</h2>
+<table><thead><tr><th>Area</th><th>Purpose</th></tr></thead><tbody><tr><td>Toolbar</td><td>Scan ports, add connections, connect/disconnect sessions, open settings, and open documentation.</td></tr><tr><td>Connections panel</td><td>Shows local serial sessions, remote serial sessions grouped by server, SSH/Telnet sessions, and remote clients connected to this machine.</td></tr><tr><td>Tab area</td><td>One terminal tab per local serial, remote serial, SSH, or Telnet session.</td></tr><tr><td>Runtime Log panel</td><td>Optional diagnostic log panel for tool behavior during development and troubleshooting.</td></tr><tr><td>Command Sets panel</td><td>Optional panel for named groups of reusable commands.</td></tr><tr><td>Status bar</td><td>Shows connection counts and remote access status.</td></tr></tbody></table>
+<h2>Add Local Serial Ports</h2>
+<h3>Scan and Add Multiple Ports</h3>
+<ol><li>Click <code>Scan Ports</code>.</li><li>Select the ports to add.</li><li>Set serial line parameters in the same dialog:</li></ol>
+<p>- Baudrate - Data bits - Parity - Stop bits - Flow control</p>
+<ol><li>Click <code>OK</code>.</li><li>Connect the added sessions manually.</li></ol>
+<p>The common default is <code>115200 8N1</code> with no flow control.</p>
+<h3>Add One Port Manually</h3>
+<ol><li>Click <code>Add Connection &gt; Serial</code>.</li><li>Enter or select the serial port.</li><li>Set baudrate, data bits, parity, stop bits, and flow control.</li><li>Click <code>OK</code>.</li><li>Connect the tab when ready.</li></ol>
+<p>The Add Serial dialog intentionally does not expose login, auto command, or keyword automation. Those features are internal/advanced behavior and are not part of the normal connection workflow.</p>
+<h2>SSH and Telnet</h2>
+<ol><li>Click <code>Add Connection</code>.</li><li>Select <code>SSH</code> or <code>Telnet</code>.</li><li>Enter host, port, and credentials when needed.</li><li>Create the session.</li></ol>
+<p>SSH/Telnet sessions appear in the same tab area and Connections panel as serial sessions.</p>
+<h2>Terminal Operation</h2>
+<table><thead><tr><th>Action</th><th>Behavior</th></tr></thead><tbody><tr><td>Type in terminal</td><td>Sends input to the selected session.</td></tr><tr><td>Right-click</td><td>Opens terminal actions such as copy, paste, find, clear, and break.</td></tr><tr><td>Drag selection</td><td>Selects terminal text.</td></tr><tr><td><code>Ctrl+F</code></td><td>Opens find.</td></tr><tr><td><code>F3</code> / <code>Shift+F3</code></td><td>Find next / previous.</td></tr><tr><td><code>Ctrl+End</code></td><td>Scroll to bottom.</td></tr><tr><td><code>Shift+PageUp</code> / <code>Shift+PageDown</code></td><td>Scroll terminal history.</td></tr></tbody></table>
+<h2>Connection Panel</h2>
+<p>Single-click a session to switch to its tab.</p>
+<p>Double-click a disconnected session to connect it.</p>
+<p>Remote sessions are grouped by server:</p>
+<pre><code class="language-text">Remote
+  127.0.0.1:56337
+    COM12 [Connected]
+  192.168.1.20:56337
+    COM5 [Disconnected]</code></pre>
+<p><code>Proxy Clients</code> shows clients connected to this machine when local Remote Access server mode is enabled.</p>
+<h2>Command Sets</h2>
+<p>Command Sets are named groups of commands. They are useful for repeated manual workflows such as collecting version information or checking network state.</p>
+<ol><li>Open <code>More &gt; Command Sets</code>.</li><li>Add a command set with a name and commands.</li><li>Select a connected terminal tab.</li><li>Run the command set.</li></ol>
+<p>Command Sets do not replace automation APIs. They are a UI convenience for humans.</p>
+<h2>Runtime Log Panel</h2>
+<p>The Runtime Log panel is hidden by default.</p>
+<p>Open it with:</p>
+<pre><code class="language-text">More &gt; Runtime Log</code></pre>
+<p>Use it when diagnosing connection behavior, remote access errors, or UI state issues.</p>
+<h2>User Preferences</h2>
+<p>TermLink automatically saves user preferences such as:</p>
+<ul><li>Window size and position.</li><li>Dock visibility.</li><li>Command Sets panel width.</li></ul>
+<p>These preferences are stored in the configuration file. They should not be confused with project defaults.</p>
+<p>TermLink creates a local <code>config.json</code> when needed. The project default template is <code>config.example.json</code>; normal user preferences and local remote-access passwords are kept out of the repository.</p></main></body>
+</html>

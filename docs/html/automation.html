@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automation Interfaces</title>
+<style>
+body {
+    color: #202124;
+    font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+    line-height: 1.65;
+    margin: 0;
+    background: #f6f7f9;
+}
+.page {
+    box-sizing: border-box;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 32px 28px 56px;
+    background: #ffffff;
+    min-height: 100vh;
+}
+nav {
+    border-bottom: 1px solid #dfe3e8;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+}
+nav a {
+    color: #1557b0;
+    margin-right: 18px;
+    text-decoration: none;
+    font-weight: 600;
+}
+h1, h2, h3 {
+    color: #1f2937;
+    line-height: 1.25;
+}
+h1 { font-size: 30px; margin-top: 0; }
+h2 { border-top: 1px solid #edf0f2; margin-top: 34px; padding-top: 20px; }
+code {
+    background: #f1f3f5;
+    border-radius: 4px;
+    padding: 1px 5px;
+}
+pre {
+    background: #111827;
+    border-radius: 6px;
+    color: #f9fafb;
+    overflow-x: auto;
+    padding: 14px 16px;
+}
+pre code {
+    background: transparent;
+    padding: 0;
+}
+table {
+    border-collapse: collapse;
+    margin: 14px 0 22px;
+    width: 100%;
+}
+th, td {
+    border: 1px solid #d7dce2;
+    padding: 8px 10px;
+    text-align: left;
+}
+th { background: #f3f5f7; }
+blockquote {
+    border-left: 4px solid #9fb7d9;
+    color: #4b5563;
+    margin-left: 0;
+    padding-left: 14px;
+}
+</style>
+</head>
+<body><main class="page"><nav><a href="index.html">Home</a><a href="user-guide.html">User Guide</a><a href="architecture.html">Architecture</a><a href="remote-access.html">Remote Access</a><a href="automation.html">Automation</a><a href="logging.html">Logging</a><a href="troubleshooting.html">Troubleshooting</a></nav><h1>Automation Interfaces</h1>
+<p>TermLink exposes local serial sessions through the Serial Access API. The GUI remote terminal, CLI, and MCP adapter share the same server, authentication rules, permissions, and ring-buffer based read model.</p>
+<h2>When to Use Automation</h2>
+<p>Use CLI or MCP when an external tool needs to:</p>
+<ul><li>List available local serial ports exposed by a TermLink server.</li><li>Read current port state.</li><li>Send data or commands to a serial port.</li><li>Wait for expected output.</li><li>Read recent serial logs.</li><li>Locate a device by IP.</li><li>Integrate serial workflows into scripts, CI jobs, or AI-assisted tools.</li></ul>
+<h2>Server Requirements</h2>
+<p>Automation uses the same Serial Access server as GUI remote serial access.</p>
+<ol><li>Open <code>Settings &gt; Serial Remote Access Settings</code>.</li><li>Enable the server.</li><li>Choose host and port.</li><li>Set a password when needed.</li><li>Add and connect local serial ports manually.</li></ol>
+<p>The default port is:</p>
+<pre><code class="language-text">56337</code></pre>
+<p>The old <code>9527</code> / <code>9528</code> split-port design is no longer used.</p>
+<h2>Authentication and Permissions</h2>
+<p>The Serial Access server enforces the same access rules for GUI, CLI, and MCP clients:</p>
+<table><thead><tr><th>Rule</th><th>Effect</th></tr></thead><tbody><tr><td>Password mismatch</td><td>Connection is rejected.</td></tr><tr><td>Banned IP</td><td>Connection is rejected.</td></tr><tr><td>Max clients reached</td><td>Connection is rejected.</td></tr><tr><td>Read-only permission</td><td>Read operations are allowed; write, command, and break operations are rejected.</td></tr><tr><td>Read-write permission</td><td>Read and write operations are allowed.</td></tr></tbody></table>
+<p>Permissions can be changed from <code>Serial Remote Access Control</code>.</p>
+<h2>CLI</h2>
+<p>Run the CLI module:</p>
+<pre><code class="language-bash">python -m automation.serialtool --host 127.0.0.1 --port 56337 list</code></pre>
+<p>If the server requires a password:</p>
+<pre><code class="language-bash">python -m automation.serialtool --host 127.0.0.1 --port 56337 --password secret list</code></pre>
+<h3>Common Commands</h3>
+<p>List ports:</p>
+<pre><code class="language-bash">python -m automation.serialtool --host 127.0.0.1 --port 56337 list</code></pre>
+<p>Get state:</p>
+<pre><code class="language-bash">python -m automation.serialtool --host 127.0.0.1 --port 56337 state COM12</code></pre>
+<p>Write raw data:</p>
+<pre><code class="language-bash">python -m automation.serialtool --host 127.0.0.1 --port 56337 write COM12 &quot;reboot\r&quot;</code></pre>
+<p>Send a command and wait:</p>
+<pre><code class="language-bash">python -m automation.serialtool --host 127.0.0.1 --port 56337 command COM12 &quot;cat /system/bin/version&quot; --duration 5 --expect &quot;#&quot; --idle-timeout 0.3</code></pre>
+<p>Watch output:</p>
+<pre><code class="language-bash">python -m automation.serialtool --host 127.0.0.1 --port 56337 watch COM12 --duration 2 --expect &quot;#&quot; --idle-timeout 0.3</code></pre>
+<p>Read the current ring-buffer state:</p>
+<pre><code class="language-bash">python -m automation.serialtool --host 127.0.0.1 --port 56337 buffer-state COM12</code></pre>
+<p>Read log snapshot:</p>
+<pre><code class="language-bash">python -m automation.serialtool --host 127.0.0.1 --port 56337 log COM12 --lines 100</code></pre>
+<p>Interactive console:</p>
+<pre><code class="language-bash">python -m automation.serialtool --host 127.0.0.1 --port 56337 console COM12</code></pre>
+<h3>CLI Command Reference</h3>
+<table><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>list</code></td><td>List exposed serial ports.</td></tr><tr><td><code>state &lt;port&gt;</code></td><td>Read current device/session state.</td></tr><tr><td><code>find-ip &lt;ip&gt;</code></td><td>Find a serial port by detected device IP.</td></tr><tr><td><code>write &lt;port&gt; &lt;data&gt;</code></td><td>Write raw data.</td></tr><tr><td><code>watch &lt;port&gt;</code></td><td>Read buffered output with bounded wait conditions.</td></tr><tr><td><code>buffer-state &lt;port&gt;</code></td><td>Read ring-buffer size, cursor, and drop counters.</td></tr><tr><td><code>command &lt;port&gt; &lt;command&gt;</code></td><td>Send a command, then watch for output.</td></tr><tr><td><code>break &lt;port&gt;</code></td><td>Send serial break.</td></tr><tr><td><code>log &lt;port&gt;</code></td><td>Read recent log lines.</td></tr><tr><td><code>fetch-device-ip &lt;port&gt;</code></td><td>Trigger device IP discovery.</td></tr><tr><td><code>console &lt;port&gt;</code></td><td>Interactive long-running console mode.</td></tr><tr><td><code>request &lt;action&gt; --params JSON</code></td><td>Low-level action request.</td></tr></tbody></table>
+<p>Legacy command aliases such as <code>list-ports</code>, <code>get-port-state</code>, <code>write-data</code>, <code>send-command</code>, <code>send-break</code>, and <code>get-log-snapshot</code> are still accepted.</p>
+<h2>Watch and Command Semantics</h2>
+<p><code>watch</code> and <code>command</code> return when the first condition is met:</p>
+<ul><li><code>expect</code> is found in collected output.</li><li><code>idle_timeout</code> seconds pass after at least one byte has been received.</li><li><code>duration</code> seconds pass.</li></ul>
+<p>Example:</p>
+<pre><code class="language-bash">python -m automation.serialtool watch COM12 --duration 10 --expect &quot;login:&quot; --idle-timeout 0.5</code></pre>
+<h3>Watch Start Position</h3>
+<p><code>watch</code> accepts a <code>--from</code> option:</p>
+<table><thead><tr><th>Value</th><th>Meaning</th></tr></thead><tbody><tr><td><code>latest</code></td><td>Start from the current latest sequence. This is the default and waits for new output only.</td></tr><tr><td><code>oldest</code></td><td>Start from the oldest data currently retained in the ring buffer.</td></tr><tr><td><code>seq</code></td><td>Start after the provided <code>--start-seq</code> value.</td></tr></tbody></table>
+<p>Examples:</p>
+<pre><code class="language-bash">python -m automation.serialtool watch COM12 --from latest --duration 5
+python -m automation.serialtool watch COM12 --from oldest --duration 1
+python -m automation.serialtool watch COM12 --from seq --start-seq 1200 --duration 5</code></pre>
+<p>Use <code>latest</code> for realtime monitoring, <code>oldest</code> to inspect the retained buffer, and <code>seq</code> for incremental polling.</p>
+<p>The response includes cursor metadata:</p>
+<table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td><code>start_seq</code></td><td>Sequence number used as the read start point.</td></tr><tr><td><code>end_seq</code></td><td>Sequence number after the returned data.</td></tr><tr><td><code>latest_seq</code></td><td>Latest sequence currently known by the server.</td></tr><tr><td><code>lost</code></td><td><code>true</code> if the requested start point was overwritten by the ring buffer.</td></tr></tbody></table>
+<p>The ring buffer is not a queue. Reads do not consume data. Multiple clients can read the same serial output independently by storing their own <code>end_seq</code> and passing it as the next <code>start_seq</code>.</p>
+<h3>Buffer State</h3>
+<p><code>buffer-state</code> reports the server-side ring buffer for one serial port:</p>
+<pre><code class="language-bash">python -m automation.serialtool buffer-state COM12</code></pre>
+<p>Typical response:</p>
+<pre><code class="language-json">{
+  &quot;port&quot;: &quot;COM12&quot;,
+  &quot;current_bytes&quot;: 140,
+  &quot;max_bytes&quot;: 10485760,
+  &quot;oldest_seq&quot;: 1,
+  &quot;latest_seq&quot;: 4,
+  &quot;dropped_bytes&quot;: 0,
+  &quot;dropped_chunks&quot;: 0,
+  &quot;last_drop_time&quot;: 0
+}</code></pre>
+<p>Use <code>oldest_seq</code> and <code>latest_seq</code> to decide whether a saved cursor is still in range. If <code>saved_seq &lt; oldest_seq - 1</code>, the next <code>watch --from seq</code> will report <code>lost=true</code>.</p>
+<h2>MCP</h2>
+<p>Configure your MCP client to start the MCP stdio adapter:</p>
+<pre><code class="language-bash">python -m automation.mcp_server --host 127.0.0.1 --port 56337</code></pre>
+<p>With password:</p>
+<pre><code class="language-bash">python -m automation.mcp_server --host 127.0.0.1 --port 56337 --password secret</code></pre>
+<h3>MCP Tools</h3>
+<table><thead><tr><th>Tool</th><th>Purpose</th></tr></thead><tbody><tr><td><code>serial_list</code></td><td>List exposed serial ports.</td></tr><tr><td><code>serial_state</code></td><td>Read current port state.</td></tr><tr><td><code>serial_find_ip</code></td><td>Find a port by IP.</td></tr><tr><td><code>serial_write</code></td><td>Write raw data.</td></tr><tr><td><code>serial_watch</code></td><td>Read buffered output with bounded wait conditions.</td></tr><tr><td><code>serial_buffer_state</code></td><td>Read ring-buffer size, cursor, and drop counters.</td></tr><tr><td><code>serial_command</code></td><td>Send command and collect output.</td></tr><tr><td><code>serial_break</code></td><td>Send serial break.</td></tr><tr><td><code>serial_log</code></td><td>Read recent log lines.</td></tr><tr><td><code>serial_fetch_device_ip</code></td><td>Trigger IP discovery.</td></tr></tbody></table>
+<p>MCP tool calls are request/response operations. They do not hold an infinite stream open. Use <code>duration</code>, <code>expect</code>, and <code>idle_timeout</code> to bound each read operation.</p>
+<p><code>serial_watch</code> accepts the same cursor controls as CLI:</p>
+<pre><code class="language-json">{
+  &quot;port&quot;: &quot;COM12&quot;,
+  &quot;from&quot;: &quot;seq&quot;,
+  &quot;start_seq&quot;: 1200,
+  &quot;duration&quot;: 5,
+  &quot;idle_timeout&quot;: 0.5
+}</code></pre>
+<p>Valid <code>from</code> values are <code>latest</code>, <code>oldest</code>, and <code>seq</code>.</p>
+<h2>GUI Remote Terminal vs CLI/MCP</h2>
+<table><thead><tr><th>Consumer</th><th>Read model</th></tr></thead><tbody><tr><td>GUI remote terminal</td><td>Realtime push connection.</td></tr><tr><td>CLI <code>watch</code> / <code>command</code></td><td>Bounded ring-buffer read.</td></tr><tr><td>MCP <code>serial_watch</code> / <code>serial_command</code></td><td>Bounded ring-buffer read.</td></tr></tbody></table>
+<p>All consumers observe the same serial output. Reading through CLI or MCP does not consume data from the GUI, and the GUI does not consume data from CLI or MCP.</p>
+<h2>Practical Patterns</h2>
+<h3>Send Command and Continue From Cursor</h3>
+<ol><li>Call <code>serial_command</code>.</li><li>Store <code>end_seq</code>.</li><li>Call <code>serial_watch</code> later with <code>start_seq=end_seq</code>.</li></ol>
+<p>This avoids rereading old output while still allowing multiple clients to read independently.</p>
+<h3>Handle Buffer Loss</h3>
+<p>If <code>lost</code> is <code>true</code>, the requested <code>start_seq</code> is too old. The server has overwritten that portion of the ring buffer. The client should treat the returned data as a resynchronization point and continue from the returned <code>end_seq</code>.</p></main></body>
+</html>

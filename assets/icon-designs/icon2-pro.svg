@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- 方案2: 专业版优化 - 终端 + 串口 + 网络 + 多设备 -->
+  <defs>
+    <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#18181b"/>
+      <stop offset="100%" style="stop-color:#27272a"/>
+    </linearGradient>
+    <linearGradient id="termGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#27272a"/>
+      <stop offset="100%" style="stop-color:#18181b"/>
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+    <filter id="glow2">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow2">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect x="0" y="0" width="128" height="128" rx="22" fill="url(#bgGrad2)"/>
+  
+  <!-- 边框装饰 -->
+  <rect x="4" y="4" width="120" height="120" rx="18" fill="none" stroke="#3f3f46" stroke-width="1"/>
+  
+  <!-- 主终端窗口 -->
+  <g filter="url(#shadow2)">
+    <rect x="16" y="16" width="96" height="68" rx="10" fill="url(#termGrad2)" stroke="#52525b" stroke-width="1.5"/>
+  </g>
+  
+  <!-- 终端标题栏 -->
+  <rect x="16" y="16" width="96" height="16" rx="10" fill="url(#titleGrad)"/>
+  <rect x="16" y="26" width="96" height="6" fill="url(#titleGrad)"/>
+  
+  <!-- 窗口按钮 -->
+  <circle cx="28" cy="24" r="4" fill="#ef4444"/>
+  <circle cx="40" cy="24" r="4" fill="#f59e0b"/>
+  <circle cx="52" cy="24" r="4" fill="#10b981"/>
+  
+  <!-- 标题文字 -->
+  <text x="88" y="27" font-family="Arial" font-size="8" fill="rgba(255,255,255,0.8)" text-anchor="middle">SerialTool</text>
+  
+  <!-- 终端内容 -->
+  <text x="24" y="48" font-family="Consolas, monospace" font-size="10" fill="#10b981" filter="url(#glow2)">root@serial:~#</text>
+  <rect x="24" y="54" width="64" height="7" rx="2" fill="#6366f1"/>
+  <rect x="24" y="64" width="48" height="5" rx="1" fill="#10b981" opacity="0.7"/>
+  <rect x="24" y="72" width="72" height="5" rx="1" fill="#a1a1aa" opacity="0.4"/>
+  
+  <!-- 光标 -->
+  <rect x="96" y="54" width="8" height="9" rx="1" fill="#10b981" filter="url(#glow2)">
+    <animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  
+  <!-- 左侧: DB9 串口 -->
+  <g transform="translate(2, 40)">
+    <rect x="0" y="0" width="12" height="28" rx="2" fill="#52525b" stroke="#f59e0b" stroke-width="1"/>
+    <g fill="#f59e0b">
+      <circle cx="4" cy="6" r="2"/>
+      <circle cx="8" cy="6" r="2"/>
+      <circle cx="6" cy="12" r="2"/>
+      <circle cx="4" cy="18" r="2"/>
+      <circle cx="8" cy="18" r="2"/>
+      <circle cx="6" cy="24" r="2"/>
+    </g>
+  </g>
+  
+  <!-- 连接线: 串口 -> 终端 -->
+  <line x1="14" y1="54" x2="16" y2="54" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="12" cy="54" r="2" fill="#f59e0b" filter="url(#glow2)"/>
+  
+  <!-- 右侧: 网络地球 -->
+  <g transform="translate(114, 40)">
+    <circle cx="6" cy="14" r="10" fill="none" stroke="#6366f1" stroke-width="2"/>
+    <ellipse cx="6" cy="14" rx="10" ry="4" fill="none" stroke="#6366f1" stroke-width="1.5"/>
+    <line x1="6" y1="4" x2="6" y2="24" stroke="#6366f1" stroke-width="1.5"/>
+    <line x1="-4" y1="14" x2="16" y2="14" stroke="#6366f1" stroke-width="1.5"/>
+    <!-- 信号点 -->
+    <circle cx="6" cy="14" r="3" fill="#6366f1" filter="url(#glow2)">
+      <animate attributeName="r" values="3;4;3" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- 连接线: 终端 -> 网络 -->
+  <line x1="112" y1="54" x2="114" y2="54" stroke="#6366f1" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="116" cy="54" r="2" fill="#6366f1" filter="url(#glow2)"/>
+  
+  <!-- 底部: 多设备状态 -->
+  <g transform="translate(16, 92)">
+    <!-- 设备1 - 已连接 -->
+    <rect x="0" y="0" width="28" height="20" rx="4" fill="#27272a" stroke="#10b981" stroke-width="2"/>
+    <circle cx="8" cy="10" r="4" fill="#10b981" filter="url(#glow2)"/>
+    <text x="18" y="13" font-family="Consolas" font-size="8" fill="#10b981">1</text>
+    <text x="14" y="26" font-family="Arial" font-size="5" fill="#71717a" text-anchor="middle">COM3</text>
+    
+    <!-- 设备2 - 已连接 -->
+    <rect x="34" y="0" width="28" height="20" rx="4" fill="#27272a" stroke="#6366f1" stroke-width="2"/>
+    <circle cx="42" cy="10" r="4" fill="#6366f1" filter="url(#glow2)"/>
+    <text x="52" y="13" font-family="Consolas" font-size="8" fill="#6366f1">2</text>
+    <text x="48" y="26" font-family="Arial" font-size="5" fill="#71717a" text-anchor="middle">COM4</text>
+    
+    <!-- 设备3 - 远程 -->
+    <rect x="68" y="0" width="28" height="20" rx="4" fill="#27272a" stroke="#f59e0b" stroke-width="2"/>
+    <circle cx="76" cy="10" r="4" fill="#f59e0b" filter="url(#glow2)"/>
+    <text x="86" y="13" font-family="Consolas" font-size="8" fill="#f59e0b">R</text>
+    <text x="82" y="26" font-family="Arial" font-size="5" fill="#71717a" text-anchor="middle">远程</text>
+  </g>
+  
+  <!-- 连接线到设备 -->
+  <line x1="30" y1="84" x2="30" y2="92" stroke="#10b981" stroke-width="1.5" stroke-dasharray="2,2"/>
+  <line x1="64" y1="84" x2="64" y2="92" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="2,2"/>
+  <line x1="98" y1="84" x2="98" y2="92" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="2,2"/>
+</svg>

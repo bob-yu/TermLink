@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TermLink Documentation</title>
+<style>
+body {
+    color: #202124;
+    font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+    line-height: 1.65;
+    margin: 0;
+    background: #f6f7f9;
+}
+.page {
+    box-sizing: border-box;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 32px 28px 56px;
+    background: #ffffff;
+    min-height: 100vh;
+}
+nav {
+    border-bottom: 1px solid #dfe3e8;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+}
+nav a {
+    color: #1557b0;
+    margin-right: 18px;
+    text-decoration: none;
+    font-weight: 600;
+}
+h1, h2, h3 {
+    color: #1f2937;
+    line-height: 1.25;
+}
+h1 { font-size: 30px; margin-top: 0; }
+h2 { border-top: 1px solid #edf0f2; margin-top: 34px; padding-top: 20px; }
+code {
+    background: #f1f3f5;
+    border-radius: 4px;
+    padding: 1px 5px;
+}
+pre {
+    background: #111827;
+    border-radius: 6px;
+    color: #f9fafb;
+    overflow-x: auto;
+    padding: 14px 16px;
+}
+pre code {
+    background: transparent;
+    padding: 0;
+}
+table {
+    border-collapse: collapse;
+    margin: 14px 0 22px;
+    width: 100%;
+}
+th, td {
+    border: 1px solid #d7dce2;
+    padding: 8px 10px;
+    text-align: left;
+}
+th { background: #f3f5f7; }
+blockquote {
+    border-left: 4px solid #9fb7d9;
+    color: #4b5563;
+    margin-left: 0;
+    padding-left: 14px;
+}
+</style>
+</head>
+<body><main class="page"><nav><a href="index.html">Home</a><a href="user-guide.html">User Guide</a><a href="architecture.html">Architecture</a><a href="remote-access.html">Remote Access</a><a href="automation.html">Automation</a><a href="logging.html">Logging</a><a href="troubleshooting.html">Troubleshooting</a></nav><h1>TermLink Documentation</h1>
+<p>TermLink is a desktop terminal tool for local serial ports, remote serial access, SSH/Telnet sessions, runtime logs, command sets, and automation integrations.</p>
+<p>The application is designed for embedded development, hardware bring-up, production debugging, and remote device access. It starts with no serial ports opened. Users explicitly scan, add, and connect the sessions they need.</p>
+<h2>Documentation Map</h2>
+<table><thead><tr><th>Document</th><th>Purpose</th></tr></thead><tbody><tr><td><a href="user-guide.html">User Guide</a></td><td>Daily workflows for local serial, SSH/Telnet, remote serial, logs, and command sets.</td></tr><tr><td><a href="architecture.html">Architecture</a></td><td>Code structure, core modules, configuration model, and test strategy.</td></tr><tr><td><a href="remote-access.html">Remote Access</a></td><td>Remote serial server/client behavior, permissions, connected clients, and multi-server usage.</td></tr><tr><td><a href="automation.html">Automation Interfaces</a></td><td>CLI and MCP interfaces exposed by the Serial Access API.</td></tr><tr><td><a href="logging.html">Logging</a></td><td>Local logs, remote log download, retention, and troubleshooting.</td></tr><tr><td><a href="troubleshooting.html">Troubleshooting</a></td><td>Common connection, display, remote access, and packaging issues.</td></tr></tbody></table>
+<h2>Core Capabilities</h2>
+<ul><li>Local serial sessions with baudrate, data bits, parity, stop bits, and flow control.</li><li>Batch serial scan and add workflow.</li><li>SSH and Telnet terminal sessions.</li><li>Remote serial access over a single Serial Access service port.</li><li>Multiple remote servers connected from one client instance.</li><li>Password-protected remote access with client control and IP bans.</li><li>Runtime log panel, per-session logs, and remote server log download.</li><li>Command sets for frequently used manual commands.</li><li>CLI and MCP adapters for automation and AI-assisted workflows.</li></ul>
+<h2>Recommended First Run</h2>
+<ol><li>Start TermLink.</li><li>Use <code>Scan Ports</code> to select one or more serial ports.</li><li>Set serial line parameters in the same scan dialog.</li><li>Add the selected ports.</li><li>Connect only the ports you want to use.</li><li>Open <code>More &gt; Runtime Log</code> when diagnosing tool behavior.</li><li>Open <code>Settings &gt; Serial Remote Access Settings</code> only when sharing local serial ports to other clients.</li></ol>
+<h2>Design Principles</h2>
+<ul><li>No automatic opening of all serial ports on startup.</li><li>One unified Serial Access service for GUI remote terminals, CLI, and MCP.</li><li>Remote access must be explicit and password-protected.</li><li>Local UI state is remembered as a user preference.</li><li>GUI workflows should stay focused on connection management, not hidden automation.</li></ul></main></body>
+</html>

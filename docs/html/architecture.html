@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture</title>
+<style>
+body {
+    color: #202124;
+    font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+    line-height: 1.65;
+    margin: 0;
+    background: #f6f7f9;
+}
+.page {
+    box-sizing: border-box;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 32px 28px 56px;
+    background: #ffffff;
+    min-height: 100vh;
+}
+nav {
+    border-bottom: 1px solid #dfe3e8;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+}
+nav a {
+    color: #1557b0;
+    margin-right: 18px;
+    text-decoration: none;
+    font-weight: 600;
+}
+h1, h2, h3 {
+    color: #1f2937;
+    line-height: 1.25;
+}
+h1 { font-size: 30px; margin-top: 0; }
+h2 { border-top: 1px solid #edf0f2; margin-top: 34px; padding-top: 20px; }
+code {
+    background: #f1f3f5;
+    border-radius: 4px;
+    padding: 1px 5px;
+}
+pre {
+    background: #111827;
+    border-radius: 6px;
+    color: #f9fafb;
+    overflow-x: auto;
+    padding: 14px 16px;
+}
+pre code {
+    background: transparent;
+    padding: 0;
+}
+table {
+    border-collapse: collapse;
+    margin: 14px 0 22px;
+    width: 100%;
+}
+th, td {
+    border: 1px solid #d7dce2;
+    padding: 8px 10px;
+    text-align: left;
+}
+th { background: #f3f5f7; }
+blockquote {
+    border-left: 4px solid #9fb7d9;
+    color: #4b5563;
+    margin-left: 0;
+    padding-left: 14px;
+}
+</style>
+</head>
+<body><main class="page"><nav><a href="index.html">Home</a><a href="user-guide.html">User Guide</a><a href="architecture.html">Architecture</a><a href="remote-access.html">Remote Access</a><a href="automation.html">Automation</a><a href="logging.html">Logging</a><a href="troubleshooting.html">Troubleshooting</a></nav><h1>Architecture</h1>
+<h2>Overview</h2>
+<p>TermLink is a PyQt5 desktop application with a layered structure:</p>
+<table><thead><tr><th>Layer</th><th>Path</th><th>Responsibility</th></tr></thead><tbody><tr><td>Entry point</td><td><code>main.py</code></td><td>Creates <code>QApplication</code>, applies app identity, and opens the main window.</td></tr><tr><td>UI</td><td><code>ui/</code></td><td>Main window, dialogs, widgets, icons, and UI controllers.</td></tr><tr><td>Core</td><td><code>core/</code></td><td>Serial workers, SSH/Telnet workers, remote serial access, logging, terminal logic, and automation services.</td></tr><tr><td>Utilities</td><td><code>utils/</code></td><td>Configuration schema/codec, config manager, and documentation builder.</td></tr><tr><td>Automation</td><td><code>automation/</code></td><td>CLI and MCP adapters for external tools.</td></tr><tr><td>Tests</td><td><code>tests/</code></td><td>Unit tests for configuration, controllers, protocol, sessions, and terminal behavior.</td></tr></tbody></table>
+<h2>Main Window Responsibilities</h2>
+<p><code>ui/main_window.py</code> owns the application shell:</p>
+<ul><li>Toolbar, status bar, docks, and tab container.</li><li>Session registry.</li><li>Top-level action wiring.</li><li>Delegation to controllers.</li><li>High-level signal routing between workers and UI.</li></ul>
+<p>The main window should not accumulate detailed business logic when a controller or core service can own it.</p>
+<h2>UI Controllers</h2>
+<table><thead><tr><th>Controller</th><th>Responsibility</th></tr></thead><tbody><tr><td><code>LocalSerialSessionController</code></td><td>Creates local serial workers, tabs, tooltips, and worker signal connections.</td></tr><tr><td><code>RemoteSerialSessionController</code></td><td>Creates remote serial tabs, routes remote data by server and port, and closes unused remote clients.</td></tr><tr><td><code>SerialAccessController</code></td><td>Starts/stops the local Serial Access server, connects remote clients, and opens access settings.</td></tr><tr><td><code>NetworkTerminalSessionController</code></td><td>Creates SSH/Telnet workers and tabs.</td></tr><tr><td><code>RemoteLogDownloadController</code></td><td>Displays remote logs and downloads selected files.</td></tr><tr><td><code>SessionController</code></td><td>Connect/disconnect operations across sessions.</td></tr><tr><td><code>TerminalSettingsController</code></td><td>Terminal and logging settings.</td></tr><tr><td><code>ScanPatternSettingsController</code></td><td>Linux serial scan pattern settings.</td></tr></tbody></table>
+<h2>Session Model</h2>
+<p>All open sessions are stored in:</p>
+<pre><code class="language-python">self._sessions: Dict[str, tuple]</code></pre>
+<p>Key formats:</p>
+<table><thead><tr><th>Session type</th><th>Example key</th></tr></thead><tbody><tr><td>Local serial</td><td><code>COM12</code> or <code>/dev/ttyUSB0</code></td></tr><tr><td>Remote serial</td><td><code>remote://127.0.0.1:56337/COM12</code></td></tr><tr><td>SSH/Telnet</td><td>Scheme-based network session key</td></tr></tbody></table>
+<p>Remote session keys include the server address so the same port name can exist on multiple remote servers.</p>
+<h2>Serial Configuration</h2>
+<p><code>PortConfigData</code> stores serial line settings:</p>
+<table><thead><tr><th>Field</th><th>Example</th></tr></thead><tbody><tr><td><code>baudrate</code></td><td><code>115200</code></td></tr><tr><td><code>data_bits</code></td><td><code>8</code></td></tr><tr><td><code>parity</code></td><td><code>N</code></td></tr><tr><td><code>stop_bits</code></td><td><code>1.0</code></td></tr><tr><td><code>flow_control</code></td><td><code>none</code></td></tr></tbody></table>
+<p>These fields are converted into <code>SerialConfig</code> and passed to <code>pyserial</code>.</p>
+<p>Flow control values:</p>
+<table><thead><tr><th>Value</th><th>pyserial flag</th></tr></thead><tbody><tr><td><code>none</code></td><td>all flow control disabled</td></tr><tr><td><code>xonxoff</code></td><td><code>xonxoff=True</code></td></tr><tr><td><code>rtscts</code></td><td><code>rtscts=True</code></td></tr><tr><td><code>dsrdtr</code></td><td><code>dsrdtr=True</code></td></tr></tbody></table>
+<h2>Serial Access Service</h2>
+<p>Remote serial access uses one unified service:</p>
+<table><thead><tr><th>Module</th><th>Responsibility</th></tr></thead><tbody><tr><td><code>serial_access_server.py</code></td><td>TCP server, client state, authentication, permissions, and message routing.</td></tr><tr><td><code>serial_access_client.py</code></td><td>GUI client for remote serial servers.</td></tr><tr><td><code>serial_access_service.py</code></td><td>Action-oriented API surface for automation.</td></tr><tr><td><code>serial_access_api_router.py</code></td><td>Routes automation actions.</td></tr><tr><td><code>serial_access_log_router.py</code></td><td>Serves remote log lists and file blocks.</td></tr><tr><td><code>serial_access_permissions.py</code></td><td>Client permission data.</td></tr><tr><td><code>serial_output_buffer.py</code></td><td>Per-port ring buffer used by CLI/MCP reads.</td></tr><tr><td><code>remote_server_manager.py</code></td><td>Tracks multiple GUI remote server clients.</td></tr></tbody></table>
+<p>The old dual-port design has been removed. GUI remote access, CLI, and MCP share the same Serial Access server port.</p>
+<h2>Multi-Server Remote Client Model</h2>
+<p>The GUI can connect to multiple remote Serial Access servers at the same time.</p>
+<p><code>RemoteServerManager</code> maps normalized server ids to <code>SerialAccessClient</code> objects:</p>
+<pre><code class="language-text">127.0.0.1:56337 -&gt; SerialAccessClient
+192.168.1.20:56337 -&gt; SerialAccessClient</code></pre>
+<p>Remote tabs are keyed by server and port:</p>
+<pre><code class="language-text">remote://127.0.0.1:56337/COM12
+remote://192.168.1.20:56337/COM12</code></pre>
+<p>This avoids collisions when different servers expose the same port name.</p>
+<h2>Logging</h2>
+<p>Local session logs are written by worker-owned <code>SerialLogger</code> instances. Runtime UI diagnostics are separate and shown in the Runtime Log panel.</p>
+<p>Remote log download is handled through the Serial Access connection. The client asks for a log list and downloads a selected file in chunks.</p>
+<h2>Configuration</h2>
+<p>Configuration is handled by:</p>
+<ul><li><code>utils/config_schema.py</code></li><li><code>utils/config_codec.py</code></li><li><code>utils/config_manager.py</code></li></ul>
+<p>The codec supports legacy fields when loading, but writes the current schema.</p>
+<p><code>config.example.json</code> is the tracked default template. Runtime state is written to local <code>config.json</code>, which is ignored by git so machine-specific ports, passwords, window geometry, dock state, command sets, and highlight rules do not enter commits or release templates.</p>
+<p>Important remote access fields:</p>
+<table><thead><tr><th>Field</th><th>Purpose</th></tr></thead><tbody><tr><td><code>serial_access_mode</code></td><td><code>disabled</code>, <code>server</code>, or legacy-compatible client state.</td></tr><tr><td><code>serial_access_host</code></td><td>Server bind address.</td></tr><tr><td><code>serial_access_port</code></td><td>Unified Serial Access port.</td></tr><tr><td><code>serial_access_password</code></td><td>Password required when this instance acts as server.</td></tr><tr><td><code>serial_access_client_password</code></td><td>Last client-side password used for Add Remote.</td></tr><tr><td><code>serial_access_max_clients</code></td><td>Max connected clients.</td></tr><tr><td><code>serial_access_default_permission</code></td><td>Default permission for new clients.</td></tr><tr><td><code>serial_access_banned_ips</code></td><td>Persisted banned IP list.</td></tr></tbody></table>
+<h2>Documentation Generation</h2>
+<p><code>utils/docs_builder.py</code> converts selected Markdown files in <code>docs/</code> to <code>docs/html/</code>.</p>
+<p>The Documentation toolbar action opens:</p>
+<pre><code class="language-text">docs/html/index.html</code></pre>
+<h2>Test Strategy</h2>
+<p>Tests cover:</p>
+<ul><li>Config load/save compatibility.</li><li>Serial Access protocol and authentication.</li><li>Remote session key behavior.</li><li>Multi-server remote session routing.</li><li>UI controller orchestration.</li><li>Terminal search, selection, and key mapping.</li><li>Logging and remote log download.</li></ul>
+<p>The test suite uses stubs for GUI-heavy or environment-specific code where direct device access is not practical.</p></main></body>
+</html>

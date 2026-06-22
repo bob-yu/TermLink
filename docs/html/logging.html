@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logging</title>
+<style>
+body {
+    color: #202124;
+    font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+    line-height: 1.65;
+    margin: 0;
+    background: #f6f7f9;
+}
+.page {
+    box-sizing: border-box;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 32px 28px 56px;
+    background: #ffffff;
+    min-height: 100vh;
+}
+nav {
+    border-bottom: 1px solid #dfe3e8;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+}
+nav a {
+    color: #1557b0;
+    margin-right: 18px;
+    text-decoration: none;
+    font-weight: 600;
+}
+h1, h2, h3 {
+    color: #1f2937;
+    line-height: 1.25;
+}
+h1 { font-size: 30px; margin-top: 0; }
+h2 { border-top: 1px solid #edf0f2; margin-top: 34px; padding-top: 20px; }
+code {
+    background: #f1f3f5;
+    border-radius: 4px;
+    padding: 1px 5px;
+}
+pre {
+    background: #111827;
+    border-radius: 6px;
+    color: #f9fafb;
+    overflow-x: auto;
+    padding: 14px 16px;
+}
+pre code {
+    background: transparent;
+    padding: 0;
+}
+table {
+    border-collapse: collapse;
+    margin: 14px 0 22px;
+    width: 100%;
+}
+th, td {
+    border: 1px solid #d7dce2;
+    padding: 8px 10px;
+    text-align: left;
+}
+th { background: #f3f5f7; }
+blockquote {
+    border-left: 4px solid #9fb7d9;
+    color: #4b5563;
+    margin-left: 0;
+    padding-left: 14px;
+}
+</style>
+</head>
+<body><main class="page"><nav><a href="index.html">Home</a><a href="user-guide.html">User Guide</a><a href="architecture.html">Architecture</a><a href="remote-access.html">Remote Access</a><a href="automation.html">Automation</a><a href="logging.html">Logging</a><a href="troubleshooting.html">Troubleshooting</a></nav><h1>Logging</h1>
+<p>TermLink has three logging-related surfaces:</p>
+<ul><li>Per-session serial/network logs.</li><li>Runtime Log panel for tool diagnostics.</li><li>Remote server log download.</li></ul>
+<h2>Session Logs</h2>
+<p>Each local serial session can write output to its own log file.</p>
+<p>Log behavior is configured in terminal settings:</p>
+<table><thead><tr><th>Setting</th><th>Purpose</th></tr></thead><tbody><tr><td>Log directory</td><td>Where log files are stored.</td></tr><tr><td>Enable logging</td><td>Turns session logging on or off.</td></tr><tr><td>Timestamp output</td><td>Adds timestamps to log lines.</td></tr><tr><td>Log file naming pattern</td><td>Controls generated log file names.</td></tr><tr><td>Retention limits</td><td>Limits log age, total size, and file size.</td></tr></tbody></table>
+<p>Remote serial tabs display remote output, but server-side physical serial logs are owned by the server instance.</p>
+<h2>Runtime Log Panel</h2>
+<p>The Runtime Log panel is a UI diagnostics surface. It is hidden by default.</p>
+<p>Open it with:</p>
+<pre><code class="language-text">More &gt; Runtime Log</code></pre>
+<p>Use it to inspect tool events while developing or troubleshooting.</p>
+<p>Runtime logs are different from serial session logs. They describe TermLink behavior rather than device output.</p>
+<h2>Remote Log Download</h2>
+<p>When connected to a remote server, a client can request the server log list and download selected log files.</p>
+<p>Typical flow:</p>
+<ol><li>Connect to a remote Serial Access server.</li><li>Open the remote log download action.</li><li>Refresh the log list.</li><li>Select a log file.</li><li>Download it to a local path.</li></ol>
+<p>If the action is unavailable, check that a remote client connection exists.</p>
+<h2>Log Cleanup</h2>
+<p>Log cleanup is managed by the log manager according to configured limits:</p>
+<ul><li>Maximum age in days.</li><li>Maximum total log directory size.</li><li>Maximum individual file size.</li><li>Auto-clean enabled or disabled.</li></ul>
+<p>Cleanup runs asynchronously so startup is not blocked by log maintenance.</p>
+<h2>Troubleshooting Logs</h2>
+<p>If logs are missing:</p>
+<ul><li>Confirm logging is enabled.</li><li>Confirm the log directory exists and is writable.</li><li>Confirm the session is connected and receiving data.</li><li>Check whether cleanup limits removed older files.</li></ul>
+<p>If remote log download fails:</p>
+<ul><li>Confirm the client is still connected to the server.</li><li>Confirm access is not banned or disconnected.</li><li>Confirm the server log directory exists.</li><li>Confirm the selected file has not been removed during cleanup.</li></ul></main></body>
+</html>
