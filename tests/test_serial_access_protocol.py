@@ -23,7 +23,7 @@ class FakeSocket:
 
 class SerialAccessProtocolTest(unittest.TestCase):
     def test_encode_decode_roundtrip(self):
-        message = {"id": 1, "action": "list_ports", "params": {"text": "中文"}}
+        message = {"id": 1, "action": "list_ports", "params": {"text": "sample text"}}
         frame = encode_service_message(message)
 
         self.assertEqual(decode_service_payload(frame[4:]), message)

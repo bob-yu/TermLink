@@ -520,7 +520,7 @@ class TerminalView(QWidget):
             is_match, is_current_match = self._is_cell_search_match(display_y, x)
             highlight_color = self._cell_highlight_color(display_y, x)
 
-            # 鑳屾櫙
+            # Cell background.
             bg = char.bg if hasattr(char, 'bg') else "default"
             if is_selected:
                 painter.fillRect(
@@ -646,7 +646,7 @@ class TerminalView(QWidget):
             line_text = self._get_display_line_text(row)
 
             if col < len(line_text):
-                # 鎵惧埌鍗曡瘝杈圭晫
+                # Find word boundaries.
                 start = col
                 end = col
 
@@ -751,14 +751,11 @@ class TerminalView(QWidget):
             return False
         return is_cell_selected(row, col, self._selection_start, self._selection_end)
 
-    # ========== 鎼滅储鍔熻兘 ==========
+    # ========== Search ==========
 
     def search(self, text: str, case_sensitive: bool = False, regex: bool = False,
                direction_up: bool = True) -> int:
-        """
-        鎼滅储鏂囨湰
-        杩斿洖鍖归厤鏁伴噺
-        """
+        """Search terminal text and return the match count."""
         self._search_text = text
         self._search_case_sensitive = case_sensitive
         self._search_regex = regex
@@ -906,10 +903,7 @@ class TerminalView(QWidget):
             self._emit_scroll_info()
 
     def _is_cell_search_match(self, display_row: int, col: int) -> tuple:
-        """
-        鍒ゆ柇鍗曞厓鏍兼槸鍚︽槸鎼滅储鍖归厤
-        杩斿洖 (is_match, is_current_match)
-        """
+        """Return whether the cell is a search match and the active match."""
         if not self._search_matches or not self._highlight_matches:
             return (False, False)
 
@@ -1202,7 +1196,7 @@ class TerminalWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # 缁堢瑙嗗浘
+        # Terminal viewport.
         self._view = TerminalView(
             send_callback,
             scrollback_lines,

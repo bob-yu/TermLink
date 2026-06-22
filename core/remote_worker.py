@@ -1,67 +1,58 @@
-"""
-远程串口工作模块
-通过网络连接远程串口，提供与本地串口相同的接口
-"""
-import socket
-import threading
-import json
-import time
-from typing import Optional, List, Dict
+"""Remote serial worker proxy."""
+
 from dataclasses import dataclass
+from typing import Dict, List, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
-from .serial_worker import WorkerState
-from .login_state_machine import LoginStateMachine, LoginConfig, LoginState
-from .network_protocol import MSG_TYPE_DATA, MSG_TYPE_SELECT_PORT, decode_message, encode_message
+from .login_state_machine import LoginConfig, LoginState, LoginStateMachine
 from .serial_access_client import SerialAccessClient
+from .serial_worker import WorkerState
 
 
 @dataclass
 class RemoteSerialConfig:
-    """远程串口配置"""
+    """Remote serial connection configuration."""
+
     server_host: str
     server_port: int
-    remote_port: str = ""  # 远程串口名称
+    remote_port: str = ""
     name: str = "Remote"
 
 
 class RemoteSerialWorkerProxy(QObject):
-    """
-    远程串口代理
-    共用一个 SerialAccessClient，每个远程串口一个代理实例
-    提供与 SerialWorker 相同的接口
-    """
+    """Proxy that exposes a remote serial port through the SerialWorker shape."""
 
-    # Qt信号定义（与 SerialWorker 相同）
-    data_received = pyqtSignal(str)           # 接收到数据
-    state_changed = pyqtSignal(WorkerState)   # 状态变化
-    login_state_changed = pyqtSignal(LoginState)  # 登录状态变化
-    error_occurred = pyqtSignal(str)          # 错误信息
-    keyword_detected = pyqtSignal(str, str)   # (关键字类型, 匹配行)
+    data_received = pyqtSignal(str)
+    state_changed = pyqtSignal(WorkerState)
+    login_state_changed = pyqtSignal(LoginState)
+    error_occurred = pyqtSignal(str)
+    keyword_detected = pyqtSignal(str, str)
 
     def __init__(self, network_client: SerialAccessClient, remote_port: str):
         super().__init__()
         self._network_client = network_client
         self._remote_port = remote_port
-        self._state = WorkerState.CONNECTED if network_client.is_connected else WorkerState.STOPPED
+        self._state = (
+            WorkerState.CONNECTED
+            if network_client and network_client.is_connected
+            else WorkerState.STOPPED
+        )
 
-        # 登录状态机
         self._login_machine: Optional[LoginStateMachine] = None
         self._auto_login_enabled = False
-
-        # 自动执行命令列表
         self._auto_commands: List[str] = []
-
-        # 关键字检测
         self._keywords: Dict[str, List[str]] = {}
 
-        # 配置对象（兼容 SerialWorker）
-        self.config = type('Config', (), {
-            'port': remote_port,
-            'baudrate': 115200,
-            'name': remote_port
-        })()
+        self.config = type(
+            "Config",
+            (),
+            {
+                "port": remote_port,
+                "baudrate": 115200,
+                "name": remote_port,
+            },
+        )()
 
     @property
     def state(self) -> WorkerState:
@@ -80,104 +71,95 @@ class RemoteSerialWorkerProxy(QObject):
         return ""
 
     def setup_login(self, login_config: LoginConfig):
-        """设置登录配置"""
+        """Set the optional automatic login configuration."""
         self._login_machine = LoginStateMachine(login_config)
         self._login_machine.set_send_callback(self.write)
         self._login_machine.set_state_change_callback(self._on_login_state_change)
         self._auto_login_enabled = True
 
     def set_auto_commands(self, commands: List[str]):
-        """设置自动执行命令列表"""
+        """Set commands that should run after automatic login."""
         self._auto_commands = commands.copy()
 
     def set_keywords(self, keywords: Dict[str, List[str]]):
-        """设置关键字检测"""
+        """Set keyword detection rules."""
         self._keywords = keywords.copy()
 
     def set_auto_reconnect(self, enabled: bool, interval: float = 5):
-        """设置自动重连（代理模式下由 SerialAccessClient 处理）"""
+        """Keep API compatibility; SerialAccessClient owns reconnect behavior."""
         pass
 
     def start(self):
-        """启动（代理模式下不需要）"""
+        """Select the remote port and mark the proxy connected."""
         if self._network_client and self._network_client.is_connected:
             self._network_client.select_port(self._remote_port)
             self._state = WorkerState.CONNECTED
             self.state_changed.emit(self._state)
             return
+
         self._state = WorkerState.DISCONNECTED
         self.state_changed.emit(self._state)
 
     def stop(self):
-        """停止"""
+        """Unselect the remote port and stop the proxy."""
         if self._network_client and self._network_client.is_connected:
             self._network_client.unselect_port(self._remote_port)
         self._state = WorkerState.STOPPED
         self.state_changed.emit(self._state)
 
     def write(self, data: str):
-        """发送数据到远程串口"""
+        """Send data to the remote serial port."""
         if not self._network_client or not self._network_client.is_connected:
             return
-
-        # 通过网络客户端发送，指定目标串口
         self._network_client.send_to_port(self._remote_port, data)
 
     def send_command(self, command: str):
-        """发送命令（自动添加换行符）"""
-        if not command.endswith('\n'):
-            command += '\n'
+        """Send a command with a trailing newline."""
+        if not command.endswith("\n"):
+            command += "\n"
         self.write(command)
 
     def send_break(self):
-        """发送 Break 信号到远程串口"""
+        """Send a break request to the remote serial port."""
         if not self._network_client or not self._network_client.is_connected:
             return
         self._network_client.send_break(self._remote_port)
 
     def start_login(self):
-        """开始登录流程"""
+        """Start the optional login flow."""
         if self._login_machine:
             self._login_machine.start()
 
     def feed_data(self, data: str):
-        """外部喂入数据（由主窗口调用）"""
-        # 发送信号
+        """Feed data received from the owning window/client."""
         self.data_received.emit(data)
-
-        # 检测关键字
         self._check_keywords(data)
 
-        # 处理登录状态机
         if self._auto_login_enabled and self._login_machine:
             self._login_machine.feed(data)
 
     def _on_login_state_change(self, state: LoginState):
-        """登录状态变化回调"""
+        """Handle login state changes."""
         self.login_state_changed.emit(state)
 
-        # 登录成功后执行自动命令
         if state == LoginState.READY:
             self._execute_auto_commands()
 
     def _execute_auto_commands(self):
-        """执行自动命令列表"""
-        if not self._auto_commands:
-            return
-
-        for cmd in self._auto_commands:
-            self.send_command(cmd)
+        """Run configured automatic commands."""
+        for command in self._auto_commands:
+            self.send_command(command)
 
     def _check_keywords(self, text: str):
-        """检测关键字"""
+        """Emit keyword detections for matching lines."""
         for keyword_type, keywords in self._keywords.items():
             for keyword in keywords:
                 if keyword in text:
-                    for line in text.split('\n'):
+                    for line in text.split("\n"):
                         if keyword in line:
                             self.keyword_detected.emit(keyword_type, line.strip())
 
     @staticmethod
     def list_ports() -> List[str]:
-        """列出可用串口（远程模式返回空）"""
+        """Remote mode does not enumerate local serial ports."""
         return []

@@ -26,7 +26,7 @@ class SerialAccessLogRouter:
             self._send_gui_message(addr, MSG_TYPE_LOG_LIST_RESPONSE, "", json.dumps(files))
         except Exception as exc:
             print(f"[SerialAccessServer] Get log list failed: {exc}")
-            self._emit_error(f"获取日志列表失败: {exc}")
+            self._emit_error(f"Get log list failed: {exc}")
 
     def handle_download_request(self, addr: str, request_data: str):
         try:
@@ -44,4 +44,4 @@ class SerialAccessLogRouter:
             })
             self._send_gui_message(addr, MSG_TYPE_LOG_DATA, "", response)
         except Exception as exc:
-            self._emit_error(f"下载日志失败: {exc}")
+            self._emit_error(f"Download log failed: {exc}")

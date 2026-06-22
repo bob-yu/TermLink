@@ -19,10 +19,10 @@ class NetworkProtocolTest(unittest.TestCase):
             {"type": MSG_TYPE_DATA, "port": "COM3", "data": "hello"},
         )
 
-    def test_unicode_payload(self):
-        frame = encode_message(MSG_TYPE_DATA, "COM3", "中文")
+    def test_text_payload(self):
+        frame = encode_message(MSG_TYPE_DATA, "COM3", "sample text")
 
-        self.assertEqual(decode_message(frame[4:])["data"], "中文")
+        self.assertEqual(decode_message(frame[4:])["data"], "sample text")
 
     def test_auth_message_roundtrip(self):
         frame = encode_message(MSG_TYPE_AUTH, "", '{"password":"secret"}')

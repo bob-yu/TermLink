@@ -1,23 +1,15 @@
-"""
-远程日志管理模块
-客户端轻量级日志记录（只记录用户操作和关键事件）
-"""
+"""Lightweight logger for remote serial sessions."""
+
 import os
-from datetime import datetime
-from typing import Optional
 import threading
+from datetime import datetime
 
 
 class RemoteLogger:
-    """
-    远程日志记录器
+    """Record remote-session commands, events, and errors.
 
-    客户端模式下的轻量级日志：
-    - 记录用户发送的命令
-    - 记录连接/断开事件
-    - 记录错误信息
-
-    不记录完整的串口输出（避免重复保存）
+    Remote sessions do not duplicate full serial output logs; the server-side
+    serial logger remains the source of truth for raw terminal data.
     """
 
     def __init__(self, remote_port: str, log_dir: str = "logs"):
@@ -29,12 +21,12 @@ class RemoteLogger:
         self._open_log_file()
 
     def _ensure_log_dir(self):
-        """确保日志目录存在"""
+        """Create the log directory when needed."""
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
 
     def _open_log_file(self):
-        """打开日志文件"""
+        """Open a new remote-session log file."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         safe_port_name = self.remote_port.replace("/", "_").replace("\\", "_").replace(":", "_")
         filename = f"remote_{safe_port_name}_{timestamp}.log"
@@ -44,11 +36,11 @@ class RemoteLogger:
 
     @property
     def filepath(self) -> str:
-        """获取日志文件路径"""
+        """Return the current log file path."""
         return self._filepath
 
     def log_command(self, command: str):
-        """记录用户发送的命令"""
+        """Record a user command."""
         timestamp = datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
         with self._lock:
             if self._file:
@@ -56,7 +48,7 @@ class RemoteLogger:
                 self._file.flush()
 
     def log_event(self, event: str):
-        """记录事件"""
+        """Record a session event."""
         timestamp = datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
         with self._lock:
             if self._file:
@@ -64,7 +56,7 @@ class RemoteLogger:
                 self._file.flush()
 
     def log_error(self, error: str):
-        """记录错误"""
+        """Record a session error."""
         timestamp = datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
         with self._lock:
             if self._file:
@@ -72,7 +64,7 @@ class RemoteLogger:
                 self._file.flush()
 
     def close(self):
-        """关闭日志文件"""
+        """Close the log file."""
         with self._lock:
             if self._file:
                 self._file.close()
