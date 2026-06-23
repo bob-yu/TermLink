@@ -123,6 +123,8 @@ class SerialAccessServer(QObject):
         self._client_read_counts: Dict[str, int] = {}
         self._client_write_counts: Dict[str, int] = {}
         self._api_subscriptions: Dict[str, set] = {}  # addr -> subscribed ports
+        self._client_protocols: Dict[str, str] = {}
+        self._client_access_records: Dict[str, dict] = {}
         self._api_router = SerialAccessApiRouter(
             self._access_service,
             self._subscribe_api_port,
@@ -182,20 +184,66 @@ class SerialAccessServer(QObject):
     def client_infos(self) -> List[SerialAccessClientInfo]:
         with self._lock:
             infos = []
+            active_gui_ips = set()
+            active_record_keys = set()
             for addr in sorted(self._clients.keys()):
+                ip = client_ip(addr)
+                protocol = self._client_protocols.get(addr, "gui")
+                record_key = f"{protocol}:{ip}"
+                active_record_keys.add(record_key)
+                if protocol != "gui" and record_key in self._client_access_records:
+                    continue
+                active_gui_ips.add(ip)
                 open_ports = sorted(self._client_open_ports.get(addr, set()))
                 selected = self._client_selected_port.get(addr, "")
+                record = self._client_access_records.get(f"gui:{ip}", {})
+                record_ports = set(record.get("ports", set()))
+                merged_ports = sorted(set(open_ports) | record_ports)
                 infos.append(SerialAccessClientInfo(
                     address=addr,
-                    ip=client_ip(addr),
+                    ip=ip,
                     permission=self._client_permissions.get(addr, self.default_permission),
                     authorized=self._client_authorized.get(addr, False),
-                    opened_ports=open_ports,
-                    selected_port=selected,
+                    connected=True,
+                    protocol=protocol,
+                    opened_ports=merged_ports,
+                    selected_port=selected or record.get("selected_port", ""),
                     connected_at=self._client_connected_at.get(addr, time.time()),
-                    last_active_at=self._client_last_active.get(addr, time.time()),
-                    read_count=self._client_read_counts.get(addr, 0),
-                    write_count=self._client_write_counts.get(addr, 0),
+                    last_active_at=max(
+                        self._client_last_active.get(addr, 0),
+                        record.get("last_active_at", 0),
+                    ) or time.time(),
+                    read_count=self._client_read_counts.get(addr, 0) + record.get("read_count", 0),
+                    write_count=self._client_write_counts.get(addr, 0) + record.get("write_count", 0),
+                    call_count=(
+                        self._client_read_counts.get(addr, 0)
+                        + self._client_write_counts.get(addr, 0)
+                        + record.get("call_count", 0)
+                    ),
+                    last_action=record.get("last_action", "connected"),
+                ))
+            active_addresses = set(self._clients.keys())
+            for key in sorted(self._client_access_records.keys()):
+                record = self._client_access_records[key]
+                address = record.get("address", key)
+                if record.get("protocol") == "gui" and record.get("ip") in active_gui_ips:
+                    continue
+                connected = key in active_record_keys
+                infos.append(SerialAccessClientInfo(
+                    address=address,
+                    ip=record.get("ip", client_ip(address)),
+                    permission=record.get("permission", self.default_permission),
+                    authorized=record.get("authorized", True),
+                    connected=connected,
+                    protocol=record.get("protocol", "api"),
+                    opened_ports=sorted(record.get("ports", set())),
+                    selected_port=record.get("selected_port", ""),
+                    connected_at=record.get("first_seen_at", time.time()),
+                    last_active_at=record.get("last_active_at", time.time()),
+                    read_count=record.get("read_count", 0),
+                    write_count=record.get("write_count", 0),
+                    call_count=record.get("call_count", 0),
+                    last_action=record.get("last_action", ""),
                 ))
             return infos
 
@@ -317,6 +365,8 @@ class SerialAccessServer(QObject):
             self._client_read_counts.clear()
             self._client_write_counts.clear()
             self._api_subscriptions.clear()
+            self._client_protocols.clear()
+            self._client_access_records.clear()
 
         # 清空缓冲区
         with self._buffer_lock:
@@ -647,6 +697,7 @@ class SerialAccessServer(QObject):
                 self._client_selected_port[addr] = port
                 self._client_open_ports.setdefault(addr, set()).add(port)
                 self._client_last_active[addr] = time.time()
+            self._record_client_access(addr, port=port, protocol="gui", action="select_port")
             self.client_updated.emit(addr)
         elif msg_type == MSG_TYPE_UNSELECT_PORT:
             with self._lock:
@@ -657,6 +708,7 @@ class SerialAccessServer(QObject):
                 if self._client_selected_port.get(addr) == port:
                     self._client_selected_port[addr] = next(iter(open_ports), "")
                 self._client_last_active[addr] = time.time()
+            self._record_client_access(addr, port=port, protocol="gui", action="unselect_port")
             self.client_updated.emit(addr)
         elif msg_type == MSG_TYPE_BREAK:
             if not self._is_write_allowed(addr):
@@ -715,6 +767,57 @@ class SerialAccessServer(QObject):
             if write:
                 self._client_write_counts[addr] = self._client_write_counts.get(addr, 0) + 1
 
+    def _record_client_port_usage(self, addr: str, port: str):
+        if not port:
+            return
+        with self._lock:
+            if addr not in self._clients:
+                return
+            self._client_selected_port[addr] = port
+            self._client_last_active[addr] = time.time()
+        self.client_updated.emit(addr)
+
+    def _record_client_access(
+        self,
+        addr: str,
+        port: str = "",
+        protocol: str = "api",
+        action: str = "",
+        read: bool = False,
+        write: bool = False,
+    ):
+        now = time.time()
+        ip = client_ip(addr)
+        key = f"{protocol}:{ip}"
+        with self._lock:
+            record = self._client_access_records.setdefault(key, {
+                "address": f"{ip} ({protocol})",
+                "ip": ip,
+                "protocol": protocol,
+                "permission": self._client_permissions.get(addr, self.default_permission),
+                "authorized": self._client_authorized.get(addr, False),
+                "ports": set(),
+                "selected_port": "",
+                "first_seen_at": now,
+                "last_active_at": now,
+                "read_count": 0,
+                "write_count": 0,
+                "call_count": 0,
+                "last_action": "",
+            })
+            record["last_active_at"] = now
+            record["permission"] = self._client_permissions.get(addr, record.get("permission", self.default_permission))
+            record["authorized"] = self._client_authorized.get(addr, record.get("authorized", False))
+            if port:
+                record["ports"].add(port)
+                record["selected_port"] = port
+            if read:
+                record["read_count"] = record.get("read_count", 0) + 1
+            if write:
+                record["write_count"] = record.get("write_count", 0) + 1
+            record["call_count"] = record.get("call_count", 0) + 1
+            record["last_action"] = action or record.get("last_action", "")
+
     def _send_gui_message(self, addr: str, msg_type: int, port: str, data: str):
         msg = encode_message(msg_type, port, data)
         with self._lock:
@@ -730,6 +833,11 @@ class SerialAccessServer(QObject):
         request_id = msg.get("id", 0)
         action = msg.get("action", "")
         params = msg.get("params", {})
+        port = params.get("port", "") if isinstance(params, dict) else ""
+        protocol = params.get("source", "api") if isinstance(params, dict) else "api"
+        with self._lock:
+            if addr in self._clients:
+                self._client_protocols[addr] = protocol
 
         if not self._is_authorized(addr):
             with self._lock:
@@ -756,6 +864,16 @@ class SerialAccessServer(QObject):
             result = {"code": ERR_INTERNAL, "message": str(exc)}
 
         self._record_client_activity(addr, write=action in WRITE_ACTIONS, read=action not in WRITE_ACTIONS)
+        if port:
+            self._record_client_port_usage(addr, port)
+        self._record_client_access(
+            addr,
+            port=port,
+            protocol=protocol,
+            action=action,
+            write=action in WRITE_ACTIONS,
+            read=action not in WRITE_ACTIONS,
+        )
         response = {"id": request_id, **result}
         self._send_api_message(addr, response)
 
@@ -835,4 +953,6 @@ class SerialAccessServer(QObject):
                 del self._client_write_counts[addr]
             if addr in self._api_subscriptions:
                 del self._api_subscriptions[addr]
+            if addr in self._client_protocols:
+                del self._client_protocols[addr]
         self.client_disconnected.emit(addr)

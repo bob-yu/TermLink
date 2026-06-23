@@ -198,6 +198,85 @@ class NetworkSerialAccessApiTest(unittest.TestCase):
         self.assertIn(b'"reason": "expect"', self.socket.sent[0])
         self.assertIn(b"data#", self.socket.sent[0])
 
+    def test_action_protocol_records_used_port_for_access_control(self):
+        self.server._handle_client_message(
+            "client",
+            {
+                "id": 12,
+                "action": "watch",
+                "params": {"port": "COM1", "duration": 0.01, "source": "cli"},
+            },
+        )
+
+        infos = self.server.client_infos()
+        history = [info for info in infos if info.protocol == "cli"][0]
+        self.assertEqual(history.opened_ports, ["COM1"])
+        self.assertEqual(history.call_count, 1)
+        self.assertEqual(history.read_count, 1)
+        self.assertEqual(history.last_action, "watch")
+        self.assertEqual(self.server.client_port_labels, [])
+
+    def test_action_protocol_history_survives_short_connection_disconnect(self):
+        self.server._handle_client_message(
+            "client",
+            {
+                "id": 12,
+                "action": "watch",
+                "params": {"port": "COM1", "duration": 0.01, "source": "mcp"},
+            },
+        )
+
+        self.server._remove_client("client")
+
+        infos = self.server.client_infos()
+        self.assertEqual(len(infos), 1)
+        self.assertEqual(infos[0].protocol, "mcp")
+        self.assertFalse(infos[0].connected)
+        self.assertEqual(infos[0].opened_ports, ["COM1"])
+
+    def test_online_gui_client_merges_gui_history_record(self):
+        self.server._handle_client_message(
+            "client",
+            {"type": MSG_TYPE_DATA, "port": "COM1", "data": "x"},
+        )
+        self.server._record_client_access(
+            "client",
+            port="COM1",
+            protocol="gui",
+            action="select_port",
+        )
+
+        infos = self.server.client_infos()
+
+        self.assertEqual(len(infos), 1)
+        self.assertEqual(infos[0].address, "client")
+        self.assertTrue(infos[0].connected)
+        self.assertEqual(infos[0].protocol, "gui")
+        self.assertEqual(infos[0].opened_ports, ["COM1"])
+
+    def test_online_cli_client_uses_aggregated_record_only(self):
+        with self.server._lock:
+            self.server._clients.pop("client")
+            self.server._client_authorized.pop("client", None)
+            self.server._clients["10.3.34.241:48964"] = self.socket
+            self.server._client_authorized["10.3.34.241:48964"] = True
+
+        self.server._handle_client_message(
+            "10.3.34.241:48964",
+            {
+                "id": 13,
+                "action": "watch",
+                "params": {"port": "COM1", "duration": 0.01, "source": "cli"},
+            },
+        )
+
+        infos = self.server.client_infos()
+
+        self.assertEqual(len(infos), 1)
+        self.assertEqual(infos[0].address, "10.3.34.241 (cli)")
+        self.assertTrue(infos[0].connected)
+        self.assertEqual(infos[0].protocol, "cli")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -28,8 +28,8 @@ class SerialRemoteAccessControlDialog(QDialog):
         self._config = config
         self._save_config = save_config
         self.setWindowTitle("Serial Remote Access Control")
-        self.resize(920, 520)
-        self.setMinimumSize(760, 420)
+        self.resize(1180, 640)
+        self.setMinimumSize(980, 520)
 
         layout = QVBoxLayout(self)
         if not server:
@@ -40,10 +40,13 @@ class SerialRemoteAccessControlDialog(QDialog):
             return
 
         splitter = QSplitter(self)
-        splitter.addWidget(self._build_client_panel())
-        splitter.addWidget(self._build_ban_panel())
+        self._client_panel = self._build_client_panel()
+        self._ban_panel = self._build_ban_panel()
+        splitter.addWidget(self._client_panel)
+        splitter.addWidget(self._ban_panel)
         splitter.setStretchFactor(0, 3)
         splitter.setStretchFactor(1, 1)
+        splitter.setSizes([840, 320])
         layout.addWidget(splitter, 1)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Close, self)
@@ -54,16 +57,20 @@ class SerialRemoteAccessControlDialog(QDialog):
     def _build_client_panel(self):
         panel = QWidget(self)
         layout = QVBoxLayout(panel)
-        layout.addWidget(QLabel("Connected clients", panel))
+        layout.addWidget(QLabel("Access records", panel))
 
-        self.client_table = QTableWidget(0, 8, panel)
+        self.client_table = QTableWidget(0, 11, panel)
         self.client_table.setHorizontalHeaderLabels([
             "Client",
             "IP",
+            "Status",
+            "Protocol",
             "Permission",
             "Authorized",
             "Ports",
             "Last active",
+            "Calls",
+            "Last action",
             "Reads",
             "Writes",
         ])
@@ -94,6 +101,7 @@ class SerialRemoteAccessControlDialog(QDialog):
 
     def _build_ban_panel(self):
         panel = QWidget(self)
+        panel.setMinimumWidth(280)
         layout = QVBoxLayout(panel)
         layout.addWidget(QLabel("Banned IPs", panel))
         self.banned_list = QListWidget(panel)
@@ -101,9 +109,11 @@ class SerialRemoteAccessControlDialog(QDialog):
 
         add_row = QHBoxLayout()
         self.banned_ip_edit = QLineEdit(panel)
+        self.banned_ip_edit.setMinimumWidth(190)
         self.banned_ip_edit.setPlaceholderText("IP address")
         self.banned_ip_edit.returnPressed.connect(self._add_banned_ip)
         add_btn = QPushButton("Add", panel)
+        add_btn.setMinimumWidth(72)
         add_btn.clicked.connect(self._add_banned_ip)
         add_row.addWidget(self.banned_ip_edit, 1)
         add_row.addWidget(add_btn)
@@ -126,10 +136,14 @@ class SerialRemoteAccessControlDialog(QDialog):
             values = [
                 info.address,
                 info.ip,
+                "Online" if info.connected else "History",
+                info.protocol.upper(),
                 info.permission,
                 "Yes" if info.authorized else "No",
                 ports,
                 self._format_age(now - info.last_active_at),
+                str(info.call_count),
+                info.last_action,
                 str(info.read_count),
                 str(info.write_count),
             ]

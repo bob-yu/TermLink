@@ -25,12 +25,16 @@ class SerialAccessClientInfo:
     ip: str
     permission: str
     authorized: bool = False
+    connected: bool = True
+    protocol: str = "gui"
     opened_ports: List[str] = field(default_factory=list)
     selected_port: str = ""
     connected_at: float = field(default_factory=time.time)
     last_active_at: float = field(default_factory=time.time)
     read_count: int = 0
     write_count: int = 0
+    call_count: int = 0
+    last_action: str = ""
 
     @property
     def label(self) -> str:
