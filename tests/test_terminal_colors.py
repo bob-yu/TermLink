@@ -29,6 +29,7 @@ _colors_path = Path(__file__).resolve().parents[1] / "ui" / "terminal_colors.py"
 _spec = importlib.util.spec_from_file_location("terminal_colors_under_test", _colors_path)
 _module = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_module)
+BG_COLOR = _module.BG_COLOR
 FG_COLOR = _module.FG_COLOR
 terminal_color = _module.terminal_color
 
@@ -45,6 +46,10 @@ class TerminalColorTest(unittest.TestCase):
 
     def test_invalid_color_uses_default(self):
         self.assertEqual(terminal_color("not-a-color", FG_COLOR), FG_COLOR)
+
+    def test_black_background_uses_theme_background(self):
+        self.assertEqual(terminal_color("black", BG_COLOR), BG_COLOR)
+        self.assertEqual(terminal_color("ansiblack", BG_COLOR), BG_COLOR)
 
 
 if __name__ == "__main__":

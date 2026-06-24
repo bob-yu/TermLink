@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QEvent, Qt
 from PyQt5.QtWidgets import (
     QAbstractItemView,
     QDockWidget,
@@ -33,22 +33,72 @@ class ConnectionPanel(QDockWidget):
 
         self._summary = QLabel(panel)
         self._summary.setWordWrap(True)
+        self._summary.installEventFilter(self)
         layout.addWidget(self._summary)
 
         self._tree = QTreeWidget(panel)
         self._tree.setHeaderHidden(True)
+        self._tree.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self._tree.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self._tree.setTextElideMode(Qt.ElideNone)
         self._tree.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self._tree.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self._tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self._tree.itemClicked.connect(self._activate_item)
         self._tree.itemDoubleClicked.connect(self._connect_item)
         self._tree.itemActivated.connect(self._activate_item)
         self._tree.customContextMenuRequested.connect(self._show_context_menu)
+        self._tree.installEventFilter(self)
+        self._tree.viewport().installEventFilter(self)
+        panel.installEventFilter(self)
         layout.addWidget(self._tree, 1)
 
         self.setWidget(panel)
         self.refresh()
+
+    def eventFilter(self, source, event):
+        if event.type() == QEvent.Wheel and source in (
+            self.widget(),
+            self._summary,
+            self._tree,
+            self._tree.viewport(),
+        ):
+            self._scroll_tree_by_wheel(event)
+            return True
+        return super().eventFilter(source, event)
+
+    def wheelEvent(self, event):
+        self._scroll_tree_by_wheel(event)
+
+    def _scroll_tree_by_wheel(self, event):
+        angle_delta = event.angleDelta()
+        pixel_delta = event.pixelDelta()
+        delta_y = pixel_delta.y() if not pixel_delta.isNull() else angle_delta.y()
+        delta_x = pixel_delta.x() if not pixel_delta.isNull() else angle_delta.x()
+
+        vertical = self._tree.verticalScrollBar()
+        horizontal = self._tree.horizontalScrollBar()
+
+        if delta_y and vertical.maximum() > 0:
+            self._scroll_bar_by_delta(vertical, delta_y)
+            event.accept()
+            return
+
+        horizontal_delta = delta_x or delta_y
+        if horizontal_delta and horizontal.maximum() > 0:
+            self._scroll_bar_by_delta(horizontal, horizontal_delta)
+            event.accept()
+            return
+
+        event.accept()
+
+    def _scroll_bar_by_delta(self, scrollbar, delta):
+        step = scrollbar.singleStep() or 20
+        if abs(delta) < 120:
+            value_delta = delta
+        else:
+            value_delta = int(delta / 120 * step * 3)
+        scrollbar.setValue(scrollbar.value() - value_delta)
 
     def refresh(self):
         snapshot = self._snapshot_provider()

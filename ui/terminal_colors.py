@@ -62,6 +62,8 @@ def terminal_color(value, default: QColor) -> QColor:
         name = ANSI_ALIASES[name]
     if name == "default":
         return default
+    if default == BG_COLOR and name in ("black", "ansiblack"):
+        return default
     if name in NAMED_COLORS:
         return NAMED_COLORS[name]
     if len(name) == 6:

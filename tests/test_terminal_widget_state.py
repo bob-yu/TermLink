@@ -25,6 +25,24 @@ class TerminalWidgetStateTest(unittest.TestCase):
         finally:
             view.cleanup()
 
+    def test_alternate_screen_restores_main_screen(self):
+        ensure_app()
+        view = TerminalView(lambda _data: None)
+        try:
+            view.feed("main")
+            view._do_deferred_update()
+            self.assertEqual(view._get_screen_line_text(0), "main")
+
+            view.feed("\x1b[?1049halt")
+            view._do_deferred_update()
+            self.assertEqual(view._get_screen_line_text(0), "alt")
+
+            view.feed("\x1b[?1049l")
+            view._do_deferred_update()
+            self.assertEqual(view._get_screen_line_text(0), "main")
+        finally:
+            view.cleanup()
+
     def test_parent_lookup_finds_ancestor_capability(self):
         class Parent:
             def show_search_dialog(self, _selected_text):

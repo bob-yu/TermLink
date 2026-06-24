@@ -67,6 +67,7 @@ class TerminalView(QWidget):
         self._screen = self._make_screen(self.cols, self.rows)
         self._screen.set_mode(pyte.modes.LNM)
         self._stream = pyte.Stream(self._screen)
+        self._alternate_screen = None
 
         # Scrollback history.
         self._scrollback = ScrollbackBuffer(scrollback_lines)
@@ -264,6 +265,7 @@ class TerminalView(QWidget):
             return
 
         data = self._handle_terminal_queries(data)
+        data = self._handle_alternate_screen(data)
         if not data:
             return
         self._pending_data += data
@@ -286,6 +288,57 @@ class TerminalView(QWidget):
         for sequence in ("\x1b[1t", "\x1b[c", "\x1b[0c", "\x1b[>c", "\x1b[>0c"):
             data = data.replace(sequence, "")
         return data
+
+    def _handle_alternate_screen(self, data: str):
+        enter_sequences = ("\x1b[?1049h", "\x1b[?1047h", "\x1b[?47h")
+        leave_sequences = ("\x1b[?1049l", "\x1b[?1047l", "\x1b[?47l")
+
+        for sequence in enter_sequences:
+            if sequence in data:
+                before, after = data.split(sequence, 1)
+                if before:
+                    self._stream.feed(before)
+                self._enter_alternate_screen()
+                return self._handle_alternate_screen(after)
+
+        for sequence in leave_sequences:
+            if sequence in data:
+                before, after = data.split(sequence, 1)
+                if before:
+                    self._stream.feed(before)
+                self._leave_alternate_screen()
+                return self._handle_alternate_screen(after)
+
+        return data
+
+    def _enter_alternate_screen(self):
+        if self._alternate_screen is None:
+            self._alternate_screen = (
+                self._screen_snapshot_lines(),
+                getattr(self._screen.cursor, "x", 0),
+                getattr(self._screen.cursor, "y", 0),
+            )
+        self._screen = self._make_screen(self.cols, self.rows)
+        self._screen.set_mode(pyte.modes.LNM)
+        self._stream = pyte.Stream(self._screen)
+        self._prev_screen_lines = []
+        self._buffer_dirty = True
+
+    def _leave_alternate_screen(self):
+        saved = self._alternate_screen
+        self._alternate_screen = None
+        self._screen = self._make_screen(self.cols, self.rows)
+        self._screen.set_mode(pyte.modes.LNM)
+        self._stream = pyte.Stream(self._screen)
+        if saved:
+            lines, cursor_x, cursor_y = saved
+            self._suppress_scrollback_capture = True
+            try:
+                self._restore_screen_snapshot(lines, cursor_x, cursor_y, align_bottom=False)
+            finally:
+                self._suppress_scrollback_capture = False
+        self._prev_screen_lines = []
+        self._buffer_dirty = True
 
     def _do_deferred_update(self):
         """Terminal widget helper."""
@@ -370,6 +423,7 @@ class TerminalView(QWidget):
     def clear(self):
         """Terminal widget helper."""
         self._screen.reset()
+        self._alternate_screen = None
         self._scrollback.clear()
         self._prev_screen_lines = []
         self._scroll_offset = 0
@@ -578,8 +632,23 @@ class TerminalView(QWidget):
 
             char_data = char.data if hasattr(char, 'data') else ' '
             if char_data and char_data != ' ':
+                base_font = painter.font()
+                styled_font = None
+                if getattr(char, "bold", False) or getattr(char, "italics", False):
+                    styled_font = QFont(base_font)
+                    styled_font.setBold(bool(getattr(char, "bold", False)))
+                    styled_font.setItalic(bool(getattr(char, "italics", False)))
+                    painter.setFont(styled_font)
                 painter.setPen(color)
                 painter.drawText(px, py + self._char_ascent, char_data)
+                if getattr(char, "underscore", False):
+                    underline_y = py + self._char_ascent + 1
+                    painter.drawLine(px, underline_y, px + self._char_width, underline_y)
+                if getattr(char, "strikethrough", False):
+                    strike_y = py + self._char_height // 2
+                    painter.drawLine(px, strike_y, px + self._char_width, strike_y)
+                if styled_font is not None:
+                    painter.setFont(base_font)
 
     def _render_text_line(self, painter: QPainter, display_y: int, text: str):
         """Terminal widget helper."""
