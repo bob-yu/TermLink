@@ -44,6 +44,7 @@ class TerminalView(QWidget):
     """Terminal viewport with scrollback, selection, search, highlight, and watch support."""
     scroll_changed = pyqtSignal(int, int)  # (current, maximum)
     watch_count_changed = pyqtSignal(int)
+    terminal_resized = pyqtSignal(int, int)  # (columns, rows)
 
     def __init__(
         self,
@@ -197,6 +198,7 @@ class TerminalView(QWidget):
 
         if new_cols != self.cols or new_rows != self.rows:
             self._resize_terminal(new_cols, new_rows)
+            self.terminal_resized.emit(new_cols, new_rows)
 
         self._buffer = QImage(new_width, new_height, QImage.Format_RGB32)
         self._buffer_dirty = True
@@ -206,11 +208,15 @@ class TerminalView(QWidget):
     def _resize_terminal(self, new_cols: int, new_rows: int):
         """Terminal widget helper."""
         current_lines = self._resize_snapshot_lines(new_rows)
+        align_bottom = len(self._scrollback) > 0
         old_rows = self.rows
         old_cursor_y = getattr(self._screen.cursor, "y", 0)
         cursor_x = min(getattr(self._screen.cursor, "x", 0), new_cols - 1)
-        cursor_bottom_offset = max(0, old_rows - 1 - old_cursor_y)
-        cursor_y = max(0, min(new_rows - 1, new_rows - 1 - cursor_bottom_offset))
+        if align_bottom:
+            cursor_bottom_offset = max(0, old_rows - 1 - old_cursor_y)
+            cursor_y = max(0, min(new_rows - 1, new_rows - 1 - cursor_bottom_offset))
+        else:
+            cursor_y = min(old_cursor_y, new_rows - 1)
 
         self.cols, self.rows = new_cols, new_rows
 
@@ -220,7 +226,7 @@ class TerminalView(QWidget):
         self._stream = pyte.Stream(self._screen)
         self._suppress_scrollback_capture = True
         try:
-            self._restore_screen_snapshot(current_lines, cursor_x, cursor_y)
+            self._restore_screen_snapshot(current_lines, cursor_x, cursor_y, align_bottom)
         finally:
             self._suppress_scrollback_capture = False
 
@@ -240,11 +246,11 @@ class TerminalView(QWidget):
         history_lines = self._scrollback.get_lines(history_start, history_count - history_start)
         return (history_lines + screen_lines)[-target_rows:]
 
-    def _restore_screen_snapshot(self, lines: list, cursor_x: int, cursor_y: int):
+    def _restore_screen_snapshot(self, lines: list, cursor_x: int, cursor_y: int, align_bottom: bool = True):
         visible_lines = lines[-self.rows:]
         if not visible_lines:
             return
-        top_padding = max(0, self.rows - len(visible_lines))
+        top_padding = max(0, self.rows - len(visible_lines)) if align_bottom else 0
         padded_lines = [""] * top_padding + visible_lines
         text = "\r\n".join(line[:self.cols] for line in padded_lines)
         if text:
@@ -257,6 +263,9 @@ class TerminalView(QWidget):
         if not data:
             return
 
+        data = self._handle_terminal_queries(data)
+        if not data:
+            return
         self._pending_data += data
 
         # Limit pending data to avoid unbounded memory growth.
@@ -266,6 +275,17 @@ class TerminalView(QWidget):
         # Start the deferred update timer if it is not already running.
         if not self._update_timer.isActive():
             self._update_timer.start(self._update_interval)
+
+    def _handle_terminal_queries(self, data: str):
+        if not self._send_callback:
+            return data
+        if "\x1b[c" in data or "\x1b[0c" in data:
+            self._send_callback("\x1b[?1;2c")
+        if "\x1b[>c" in data or "\x1b[>0c" in data:
+            self._send_callback("\x1b[>0;276;0c")
+        for sequence in ("\x1b[1t", "\x1b[c", "\x1b[0c", "\x1b[>c", "\x1b[>0c"):
+            data = data.replace(sequence, "")
+        return data
 
     def _do_deferred_update(self):
         """Terminal widget helper."""
@@ -1181,6 +1201,8 @@ class TerminalView(QWidget):
 class TerminalWidget(QWidget):
     """Terminal widget with scrollbar and search."""
 
+    terminal_resized = pyqtSignal(int, int)
+
     def __init__(
         self,
         send_callback,
@@ -1230,6 +1252,7 @@ class TerminalWidget(QWidget):
         # Signal connections.
         self._view.scroll_changed.connect(self._on_view_scroll)
         self._view.watch_count_changed.connect(self._on_watch_count_changed)
+        self._view.terminal_resized.connect(self.terminal_resized)
         self._scrollbar.valueChanged.connect(self._on_scrollbar_changed)
 
         self.setStyleSheet("background-color: #1e1e1e;")

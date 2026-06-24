@@ -1,6 +1,7 @@
 PyQt5>=5.15.0
 pyserial>=3.5
 pyte>=0.8.0
+pywinpty>=2.0.0; platform_system == "Windows"
 
-# 可选：SSH/SFTP 功能
+# Optional SSH/SFTP support
 paramiko>=3.0.0

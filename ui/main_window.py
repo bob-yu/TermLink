@@ -48,6 +48,7 @@ from .toolbar_builder import build_main_toolbar
 
 from .controllers import (
     LocalSerialSessionController,
+    LocalShellSessionController,
     RemoteLogDownloadController,
     HighlightRulesController,
     ScanPatternSettingsController,
@@ -149,6 +150,7 @@ class MainWindow(QMainWindow):
         self._remote_log_download = RemoteLogDownloadController(self)
 
         self._local_serial_sessions = LocalSerialSessionController(self)
+        self._local_shell_sessions = LocalShellSessionController(self)
         self._network_terminal_sessions = None
         self._highlight_rules = HighlightRulesController(self)
         self._terminal_settings = TerminalSettingsController(self)
@@ -383,6 +385,7 @@ class MainWindow(QMainWindow):
         base_name = config.name if config and getattr(config, "name", "") else ""
 
         protocol_prefixes = (
+            ("localshell://", "Local Shell"),
             ("ssh://", "SSH"),
             ("telnet://", "Telnet"),
             ("rawtcp://", "Raw TCP"),
@@ -784,6 +787,18 @@ See CHANGELOG.md in the project root for the full changelog.
             port_config = dialog.get_config()
 
             self._create_session(port_config)
+
+    def _add_local_shell_connection(self):
+
+        """Add a local shell session."""
+
+        from .local_shell_dialog import LocalShellDialog
+
+        dialog = LocalShellDialog(self)
+
+        if dialog.exec_() == QDialog.Accepted:
+
+            self._local_shell_sessions.create_session(dialog.get_config())
 
     def _add_ssh_connection(self):
 

@@ -1,4 +1,5 @@
 from .local_serial_sessions import LocalSerialSessionController
+from .local_shell_sessions import LocalShellSessionController
 from .highlight_rules import HighlightRulesController
 from .remote_log_download import RemoteLogDownloadController
 from .remote_serial_sessions import RemoteSerialSessionController
@@ -9,6 +10,7 @@ from .terminal_settings import TerminalSettingsController
 
 __all__ = [
     "LocalSerialSessionController",
+    "LocalShellSessionController",
     "HighlightRulesController",
     "RemoteLogDownloadController",
     "RemoteSerialSessionController",

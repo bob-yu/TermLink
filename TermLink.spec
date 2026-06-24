@@ -30,6 +30,7 @@ hiddenimports = [
     'cffi',
     'nacl',
     'bcrypt',
+    'winpty',
 ]
 
 excludes = [

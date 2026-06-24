@@ -13,6 +13,7 @@ class MainWindowActions:
     def __init__(self, window):
         self.scan_ports = self._action(window, "Scan Ports", "Ctrl+R", window._scan_and_connect_all, "scan")
         self.add_serial = self._action(window, "Serial", "Ctrl+N", window._add_serial_port, "connection-serial")
+        self.add_local_shell = self._action(window, "Local Shell", None, window._add_local_shell_connection, "terminal")
         self.connect_all = self._action(window, "Connect All", None, window._connect_all, "plug-connect")
         self.disconnect_all = self._action(window, "Disconnect All", None, window._disconnect_all, "plug-disconnect")
 

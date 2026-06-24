@@ -125,7 +125,7 @@ class FakeDock:
 class FakeActions:
     def __init__(self):
         for name in [
-            "scan_ports", "add_serial", "add_ssh", "add_telnet", "add_raw_tcp",
+            "scan_ports", "add_serial", "add_local_shell", "add_ssh", "add_telnet", "add_raw_tcp",
             "add_remote_serial", "connect_all", "disconnect_all",
             "access_settings", "access_control", "terminal_settings",
             "open_docs", "download_logs", "about", "exit_app",
@@ -158,6 +158,7 @@ class ToolbarBuilderTest(unittest.TestCase):
             for action in menu.items
             if hasattr(action, "text")
         ]
+        self.assertIn("add_local_shell", menu_labels)
         self.assertIn("add_raw_tcp", menu_labels)
         self.assertIn("add_serial", menu_labels)
         self.assertIn("add_remote_serial", menu_labels)

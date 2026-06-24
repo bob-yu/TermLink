@@ -58,6 +58,7 @@ class SerialTab(QWidget):
             font_family=self._font_family,
             font_size=self._font_size,
         )
+        self.terminal.terminal_resized.connect(self._resize_worker_terminal)
         layout.addWidget(self.terminal, 1)
         self.terminal.setFocus()
 
@@ -129,6 +130,10 @@ class SerialTab(QWidget):
     def _send_data(self, data: str):
         if self.worker.is_connected:
             self.worker.write(data)
+
+    def _resize_worker_terminal(self, cols: int, rows: int):
+        if hasattr(self.worker, "resize"):
+            self.worker.resize(cols, rows)
 
     def _show_search(self):
         self.terminal.show_search_dialog()

@@ -81,13 +81,23 @@ blockquote {
 <ul><li>Toolbar, status bar, docks, and tab container.</li><li>Session registry.</li><li>Top-level action wiring.</li><li>Delegation to controllers.</li><li>High-level signal routing between workers and UI.</li></ul>
 <p>The main window should not accumulate detailed business logic when a controller or core service can own it.</p>
 <h2>UI Controllers</h2>
-<table><thead><tr><th>Controller</th><th>Responsibility</th></tr></thead><tbody><tr><td><code>LocalSerialSessionController</code></td><td>Creates local serial workers, tabs, tooltips, and worker signal connections.</td></tr><tr><td><code>RemoteSerialSessionController</code></td><td>Creates remote serial tabs, routes remote data by server and port, and closes unused remote clients.</td></tr><tr><td><code>SerialAccessController</code></td><td>Starts/stops the local Serial Access server, connects remote clients, and opens access settings.</td></tr><tr><td><code>NetworkTerminalSessionController</code></td><td>Creates SSH/Telnet workers and tabs.</td></tr><tr><td><code>RemoteLogDownloadController</code></td><td>Displays remote logs and downloads selected files.</td></tr><tr><td><code>SessionController</code></td><td>Connect/disconnect operations across sessions.</td></tr><tr><td><code>TerminalSettingsController</code></td><td>Terminal and logging settings.</td></tr><tr><td><code>ScanPatternSettingsController</code></td><td>Linux serial scan pattern settings.</td></tr></tbody></table>
+<table><thead><tr><th>Controller</th><th>Responsibility</th></tr></thead><tbody><tr><td><code>LocalSerialSessionController</code></td><td>Creates local serial workers, tabs, tooltips, and worker signal connections.</td></tr><tr><td><code>LocalShellSessionController</code></td><td>Creates local shell tabs backed by PTY/ConPTY workers.</td></tr><tr><td><code>RemoteSerialSessionController</code></td><td>Creates remote serial tabs, routes remote data by server and port, and closes unused remote clients.</td></tr><tr><td><code>SerialAccessController</code></td><td>Starts/stops the local Serial Access server, connects remote clients, and opens access settings.</td></tr><tr><td><code>NetworkTerminalSessionController</code></td><td>Creates SSH, Telnet, and Raw TCP workers and tabs.</td></tr><tr><td><code>RemoteLogDownloadController</code></td><td>Displays remote logs and downloads selected files.</td></tr><tr><td><code>SessionController</code></td><td>Connect/disconnect operations across sessions.</td></tr><tr><td><code>TerminalSettingsController</code></td><td>Terminal and logging settings.</td></tr><tr><td><code>ScanPatternSettingsController</code></td><td>Linux serial scan pattern settings.</td></tr></tbody></table>
 <h2>Session Model</h2>
 <p>All open sessions are stored in:</p>
 <pre><code class="language-python">self._sessions: Dict[str, tuple]</code></pre>
 <p>Key formats:</p>
-<table><thead><tr><th>Session type</th><th>Example key</th></tr></thead><tbody><tr><td>Local serial</td><td><code>COM12</code> or <code>/dev/ttyUSB0</code></td></tr><tr><td>Remote serial</td><td><code>remote://127.0.0.1:56337/COM12</code></td></tr><tr><td>SSH/Telnet</td><td>Scheme-based network session key</td></tr></tbody></table>
+<table><thead><tr><th>Session type</th><th>Example key</th></tr></thead><tbody><tr><td>Local serial</td><td><code>COM12</code> or <code>/dev/ttyUSB0</code></td></tr><tr><td>Local shell</td><td><code>localshell://PowerShell@powershell.exe</code></td></tr><tr><td>Remote serial</td><td><code>remote://127.0.0.1:56337/COM12</code></td></tr><tr><td>SSH/Telnet/Raw TCP</td><td>Scheme-based network session key</td></tr></tbody></table>
 <p>Remote session keys include the server address so the same port name can exist on multiple remote servers.</p>
+<h2>Local Shell</h2>
+<p>Local shell sessions reuse the same <code>SerialTab</code> and <code>TerminalWidget</code> used by serial and network sessions.</p>
+<pre><code class="language-text">TerminalWidget
+  -&gt; LocalShellWorker
+      -&gt; Windows: pywinpty / ConPTY
+      -&gt; Linux/macOS: pty
+          -&gt; system shell</code></pre>
+<p><code>LocalShellWorker</code> is in <code>core/local_shell_worker.py</code>. It exposes the normal worker surface:</p>
+<pre><code class="language-text">start, stop, write, send_command, resize, is_connected, source_id</code></pre>
+<p>Resize events from <code>TerminalWidget</code> are forwarded through <code>SerialTab</code> to workers that implement <code>resize(cols, rows)</code>.</p>
 <h2>Serial Configuration</h2>
 <p><code>PortConfigData</code> stores serial line settings:</p>
 <table><thead><tr><th>Field</th><th>Example</th></tr></thead><tbody><tr><td><code>baudrate</code></td><td><code>115200</code></td></tr><tr><td><code>data_bits</code></td><td><code>8</code></td></tr><tr><td><code>parity</code></td><td><code>N</code></td></tr><tr><td><code>stop_bits</code></td><td><code>1.0</code></td></tr><tr><td><code>flow_control</code></td><td><code>none</code></td></tr></tbody></table>

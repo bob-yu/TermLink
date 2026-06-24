@@ -21,8 +21,8 @@ TermLink does not automatically open serial ports. Add and connect sessions manu
 | Area | Purpose |
 |---|---|
 | Toolbar | Scan ports, add connections, connect/disconnect sessions, open settings, and open documentation. |
-| Connections panel | Shows local serial sessions, remote serial sessions grouped by server, SSH/Telnet sessions, and remote clients connected to this machine. |
-| Tab area | One terminal tab per local serial, remote serial, SSH, or Telnet session. |
+| Connections panel | Shows local serial, local shell, remote serial, network terminal sessions, and remote clients connected to this machine. |
+| Tab area | One terminal tab per local serial, local shell, remote serial, SSH, Telnet, Raw TCP, or remote serial session. |
 | Runtime Log panel | Optional diagnostic log panel for tool behavior during development and troubleshooting. |
 | Command Sets panel | Optional panel for named groups of reusable commands. |
 | Status bar | Shows connection counts and remote access status. |
@@ -62,6 +62,29 @@ The Add Serial dialog intentionally does not expose login, auto command, or keyw
 4. Create the session.
 
 SSH/Telnet sessions appear in the same tab area and Connections panel as serial sessions.
+
+## Local Shell
+
+Local Shell opens the computer's own shell inside a TermLink tab.
+
+1. Click `Add Connection > Local Shell`.
+2. Keep the default shell or enter a command:
+   - Windows: `pwsh.exe`, `powershell.exe`, or `cmd.exe`
+   - Linux/macOS: `$SHELL`, `/bin/bash`, `/bin/sh`, or another shell
+3. Optionally choose a working directory.
+4. Create the session.
+
+Windows Local Shell uses ConPTY through `pywinpty`. Linux/macOS Local Shell uses the system PTY API. This allows interactive behavior such as Tab completion, command history, colors, and `Ctrl+C`.
+
+## Raw TCP
+
+Raw TCP opens a plain TCP byte stream in a terminal tab. It is useful for board-side raw TCP CLI services that are similar to `nc host 2323` but need real interactive key handling.
+
+1. Click `Add Connection > Raw TCP`.
+2. Enter host and port. The default port is `2323`.
+3. Create the session.
+
+Raw TCP is not Telnet. It does not perform Telnet option negotiation.
 
 ## Terminal Operation
 

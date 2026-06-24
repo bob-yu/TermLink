@@ -78,6 +78,7 @@ class FakeWindow:
 
     def _scan_and_connect_all(self): pass
     def _add_serial_port(self): pass
+    def _add_local_shell_connection(self): pass
     def _connect_all(self): pass
     def _disconnect_all(self): pass
     def _save_config(self): pass
@@ -102,6 +103,7 @@ class MainWindowActionsTest(unittest.TestCase):
         self.assertEqual(actions.scan_ports.shortcut(), "Ctrl+R")
         self.assertEqual(actions.add_serial.text(), "Serial")
         self.assertEqual(actions.add_serial.shortcut(), "Ctrl+N")
+        self.assertEqual(actions.add_local_shell.text(), "Local Shell")
         self.assertEqual(actions.add_raw_tcp.text(), "Raw TCP")
         self.assertEqual(actions.access_settings.text(), "Serial Remote Access Settings")
         self.assertEqual(actions.access_control.text(), "Serial Remote Access Control")

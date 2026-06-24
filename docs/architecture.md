@@ -30,9 +30,10 @@ The main window should not accumulate detailed business logic when a controller 
 | Controller | Responsibility |
 |---|---|
 | `LocalSerialSessionController` | Creates local serial workers, tabs, tooltips, and worker signal connections. |
+| `LocalShellSessionController` | Creates local shell tabs backed by PTY/ConPTY workers. |
 | `RemoteSerialSessionController` | Creates remote serial tabs, routes remote data by server and port, and closes unused remote clients. |
 | `SerialAccessController` | Starts/stops the local Serial Access server, connects remote clients, and opens access settings. |
-| `NetworkTerminalSessionController` | Creates SSH/Telnet workers and tabs. |
+| `NetworkTerminalSessionController` | Creates SSH, Telnet, and Raw TCP workers and tabs. |
 | `RemoteLogDownloadController` | Displays remote logs and downloads selected files. |
 | `SessionController` | Connect/disconnect operations across sessions. |
 | `TerminalSettingsController` | Terminal and logging settings. |
@@ -51,10 +52,31 @@ Key formats:
 | Session type | Example key |
 |---|---|
 | Local serial | `COM12` or `/dev/ttyUSB0` |
+| Local shell | `localshell://PowerShell@powershell.exe` |
 | Remote serial | `remote://127.0.0.1:56337/COM12` |
-| SSH/Telnet | Scheme-based network session key |
+| SSH/Telnet/Raw TCP | Scheme-based network session key |
 
 Remote session keys include the server address so the same port name can exist on multiple remote servers.
+
+## Local Shell
+
+Local shell sessions reuse the same `SerialTab` and `TerminalWidget` used by serial and network sessions.
+
+```text
+TerminalWidget
+  -> LocalShellWorker
+      -> Windows: pywinpty / ConPTY
+      -> Linux/macOS: pty
+          -> system shell
+```
+
+`LocalShellWorker` is in `core/local_shell_worker.py`. It exposes the normal worker surface:
+
+```text
+start, stop, write, send_command, resize, is_connected, source_id
+```
+
+Resize events from `TerminalWidget` are forwarded through `SerialTab` to workers that implement `resize(cols, rows)`.
 
 ## Serial Configuration
 

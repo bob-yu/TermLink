@@ -80,7 +80,7 @@ blockquote {
 <pre><code class="language-bash">TermLink.exe</code></pre>
 <p>TermLink does not automatically open serial ports. Add and connect sessions manually.</p>
 <h2>Main Window</h2>
-<table><thead><tr><th>Area</th><th>Purpose</th></tr></thead><tbody><tr><td>Toolbar</td><td>Scan ports, add connections, connect/disconnect sessions, open settings, and open documentation.</td></tr><tr><td>Connections panel</td><td>Shows local serial sessions, remote serial sessions grouped by server, SSH/Telnet sessions, and remote clients connected to this machine.</td></tr><tr><td>Tab area</td><td>One terminal tab per local serial, remote serial, SSH, or Telnet session.</td></tr><tr><td>Runtime Log panel</td><td>Optional diagnostic log panel for tool behavior during development and troubleshooting.</td></tr><tr><td>Command Sets panel</td><td>Optional panel for named groups of reusable commands.</td></tr><tr><td>Status bar</td><td>Shows connection counts and remote access status.</td></tr></tbody></table>
+<table><thead><tr><th>Area</th><th>Purpose</th></tr></thead><tbody><tr><td>Toolbar</td><td>Scan ports, add connections, connect/disconnect sessions, open settings, and open documentation.</td></tr><tr><td>Connections panel</td><td>Shows local serial, local shell, remote serial, network terminal sessions, and remote clients connected to this machine.</td></tr><tr><td>Tab area</td><td>One terminal tab per local serial, local shell, remote serial, SSH, Telnet, Raw TCP, or remote serial session.</td></tr><tr><td>Runtime Log panel</td><td>Optional diagnostic log panel for tool behavior during development and troubleshooting.</td></tr><tr><td>Command Sets panel</td><td>Optional panel for named groups of reusable commands.</td></tr><tr><td>Status bar</td><td>Shows connection counts and remote access status.</td></tr></tbody></table>
 <h2>Add Local Serial Ports</h2>
 <h3>Scan and Add Multiple Ports</h3>
 <ol><li>Click <code>Scan Ports</code>.</li><li>Select the ports to add.</li><li>Set serial line parameters in the same dialog:</li></ol>
@@ -93,6 +93,16 @@ blockquote {
 <h2>SSH and Telnet</h2>
 <ol><li>Click <code>Add Connection</code>.</li><li>Select <code>SSH</code> or <code>Telnet</code>.</li><li>Enter host, port, and credentials when needed.</li><li>Create the session.</li></ol>
 <p>SSH/Telnet sessions appear in the same tab area and Connections panel as serial sessions.</p>
+<h2>Local Shell</h2>
+<p>Local Shell opens the computer&#x27;s own shell inside a TermLink tab.</p>
+<ol><li>Click <code>Add Connection &gt; Local Shell</code>.</li><li>Keep the default shell or enter a command:</li></ol>
+<p>- Windows: <code>pwsh.exe</code>, <code>powershell.exe</code>, or <code>cmd.exe</code> - Linux/macOS: <code>$SHELL</code>, <code>/bin/bash</code>, <code>/bin/sh</code>, or another shell</p>
+<ol><li>Optionally choose a working directory.</li><li>Create the session.</li></ol>
+<p>Windows Local Shell uses ConPTY through <code>pywinpty</code>. Linux/macOS Local Shell uses the system PTY API. This allows interactive behavior such as Tab completion, command history, colors, and <code>Ctrl+C</code>.</p>
+<h2>Raw TCP</h2>
+<p>Raw TCP opens a plain TCP byte stream in a terminal tab. It is useful for board-side raw TCP CLI services that are similar to <code>nc host 2323</code> but need real interactive key handling.</p>
+<ol><li>Click <code>Add Connection &gt; Raw TCP</code>.</li><li>Enter host and port. The default port is <code>2323</code>.</li><li>Create the session.</li></ol>
+<p>Raw TCP is not Telnet. It does not perform Telnet option negotiation.</p>
 <h2>Terminal Operation</h2>
 <table><thead><tr><th>Action</th><th>Behavior</th></tr></thead><tbody><tr><td>Type in terminal</td><td>Sends input to the selected session.</td></tr><tr><td>Right-click</td><td>Opens terminal actions such as copy, paste, find, clear, and break.</td></tr><tr><td>Drag selection</td><td>Selects terminal text.</td></tr><tr><td><code>Ctrl+F</code></td><td>Opens find.</td></tr><tr><td><code>F3</code> / <code>Shift+F3</code></td><td>Find next / previous.</td></tr><tr><td><code>Ctrl+End</code></td><td>Scroll to bottom.</td></tr><tr><td><code>Shift+PageUp</code> / <code>Shift+PageDown</code></td><td>Scroll terminal history.</td></tr></tbody></table>
 <h2>Connection Panel</h2>

@@ -61,6 +61,7 @@ def build_main_toolbar(window) -> QToolBar:
 def _add_connection_menu(window, toolbar: QToolBar):
     add_connection_menu = QMenu(window)
     add_connection_menu.addAction(window.actions.add_serial)
+    add_connection_menu.addAction(window.actions.add_local_shell)
     add_connection_menu.addAction(window.actions.add_ssh)
     add_connection_menu.addAction(window.actions.add_telnet)
     add_connection_menu.addAction(window.actions.add_raw_tcp)
