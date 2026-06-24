@@ -21,6 +21,7 @@ class MainWindowActions:
 
         self.add_ssh = self._action(window, "SSH", "Ctrl+Shift+S", window._add_ssh_connection, "connection-ssh")
         self.add_telnet = self._action(window, "Telnet", "Ctrl+Shift+T", window._add_telnet_connection, "connection-telnet")
+        self.add_raw_tcp = self._action(window, "Raw TCP", None, window._add_raw_tcp_connection, "terminal")
         self.add_remote_serial = self._action(window, "Remote Serial", None, window._add_remote_serial_connection, "network")
 
         self.scan_patterns = self._action(window, "Scan Patterns", None, window._scan_pattern_settings.show, "search")

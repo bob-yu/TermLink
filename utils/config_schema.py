@@ -76,7 +76,7 @@ class AppConfigData:
     show_connections_panel: bool = True
     show_runtime_log_panel: bool = False
     show_command_sets_panel: bool = False
-    command_sets_panel_width: int = 45
+    command_sets_panel_width: int = 140
     command_sets: List[CommandSetData] = field(default_factory=list)
     highlight_rules: List[HighlightRuleData] = field(default_factory=list)
 

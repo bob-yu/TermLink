@@ -31,7 +31,7 @@ def create_default_config() -> AppConfigData:
         show_connections_panel=True,
         show_runtime_log_panel=False,
         show_command_sets_panel=False,
-        command_sets_panel_width=45,
+        command_sets_panel_width=140,
         command_sets=[],
         highlight_rules=[],
         serial_access_default_permission="read-write",
@@ -135,7 +135,7 @@ def parse_config(data: Dict[str, Any]) -> AppConfigData:
         show_connections_panel=data.get("show_connections_panel", True),
         show_runtime_log_panel=data.get("show_runtime_log_panel", False),
         show_command_sets_panel=data.get("show_command_sets_panel", False),
-        command_sets_panel_width=data.get("command_sets_panel_width", 45),
+        command_sets_panel_width=data.get("command_sets_panel_width", 140),
         command_sets=command_sets,
         highlight_rules=highlight_rules,
     )

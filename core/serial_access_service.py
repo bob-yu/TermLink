@@ -265,4 +265,4 @@ class SerialAccessService:
 
     @staticmethod
     def _is_remote_or_network_session(port_path: str) -> bool:
-        return is_remote_session_key(port_path) or port_path.startswith(("ssh://", "telnet://"))
+        return is_remote_session_key(port_path) or port_path.startswith(("ssh://", "telnet://", "rawtcp://"))

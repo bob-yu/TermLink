@@ -11,4 +11,4 @@ def serial_port_configs_to_save(sessions: dict):
 
 
 def _is_network_terminal_key(key: str) -> bool:
-    return key.startswith(("ssh://", "telnet://"))
+    return key.startswith(("ssh://", "telnet://", "rawtcp://"))

@@ -26,7 +26,7 @@ class ConfigCodecTest(unittest.TestCase):
         self.assertTrue(config.show_connections_panel)
         self.assertFalse(config.show_runtime_log_panel)
         self.assertFalse(config.show_command_sets_panel)
-        self.assertEqual(config.command_sets_panel_width, 45)
+        self.assertEqual(config.command_sets_panel_width, 140)
         self.assertEqual(config.serial_access_max_clients, 16)
         self.assertEqual(config.serial_access_client_password, "")
         self.assertEqual(config.serial_access_default_permission, "read-write")

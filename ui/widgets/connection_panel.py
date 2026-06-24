@@ -70,7 +70,7 @@ class ConnectionPanel(QDockWidget):
         self._tree.clear()
         self._add_group("Local", sorted(local_ports, key=lambda row: row[1]))
         self._add_remote_group(remote_ports)
-        self._add_group("SSH/Telnet", sorted(network_terms, key=lambda row: row[1]))
+        self._add_group("Network", sorted(network_terms, key=lambda row: row[1]))
         self._add_group("Proxy Clients", [(client, client) for client in snapshot.access.clients])
         self._tree.expandAll()
         self._tree.resizeColumnToContents(0)

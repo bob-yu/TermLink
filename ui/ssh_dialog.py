@@ -15,11 +15,11 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 
-from core.ssh_worker import ConnectionType, SSHConfig, SSHWorker, TelnetConfig
+from core.ssh_worker import ConnectionType, RawTcpConfig, SSHConfig, SSHWorker, TelnetConfig
 
 
 class SSHConnectDialog(QDialog):
-    """SSH/Telnet connection dialog."""
+    """SSH/Telnet/Raw TCP connection dialog."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -36,6 +36,7 @@ class SSHConnectDialog(QDialog):
         self.type_combo = QComboBox()
         self.type_combo.addItem("SSH", ConnectionType.SSH)
         self.type_combo.addItem("Telnet", ConnectionType.TELNET)
+        self.type_combo.addItem("Raw TCP", ConnectionType.RAW_TCP)
         self.type_combo.currentIndexChanged.connect(self._on_type_changed)
         type_layout.addWidget(self.type_combo)
 
@@ -101,14 +102,19 @@ class SSHConnectDialog(QDialog):
 
         if conn_type == ConnectionType.SSH:
             self.port_spin.setValue(22)
+            self.auth_group.setVisible(True)
             self.key_label.setVisible(True)
             self.key_edit.setVisible(True)
             self.key_btn.setVisible(True)
-        else:
+        elif conn_type == ConnectionType.TELNET:
             self.port_spin.setValue(23)
+            self.auth_group.setVisible(True)
             self.key_label.setVisible(False)
             self.key_edit.setVisible(False)
             self.key_btn.setVisible(False)
+        else:
+            self.port_spin.setValue(2323)
+            self.auth_group.setVisible(False)
 
     def _browse_key_file(self):
         filename, _ = QFileDialog.getOpenFileName(
@@ -150,11 +156,19 @@ class SSHConnectDialog(QDialog):
                 connection_type=ConnectionType.SSH,
             )
 
-        return TelnetConfig(
+        if conn_type == ConnectionType.TELNET:
+            return TelnetConfig(
+                host=self.host_edit.text().strip(),
+                port=self.port_spin.value(),
+                username=self.username_edit.text().strip(),
+                password=self.password_edit.text(),
+                name=self.name_edit.text().strip(),
+                connection_type=ConnectionType.TELNET,
+            )
+
+        return RawTcpConfig(
             host=self.host_edit.text().strip(),
             port=self.port_spin.value(),
-            username=self.username_edit.text().strip(),
-            password=self.password_edit.text(),
             name=self.name_edit.text().strip(),
-            connection_type=ConnectionType.TELNET,
+            connection_type=ConnectionType.RAW_TCP,
         )

@@ -15,22 +15,28 @@ echo   %APP_NAME% v%VERSION% Package
 echo ========================================
 echo.
 
-if not exist "%DIST_DIR%\%APP_NAME%.exe" (
-    echo [ERROR] Built executable was not found: %DIST_DIR%\%APP_NAME%.exe
-    echo [HINT] Run build.bat first.
+echo [1/5] Building latest executable package...
+call "%~dp0build.bat"
+if errorlevel 1 (
+    echo [ERROR] Build failed. Package was not created.
     exit /b 1
 )
 
-echo [1/4] Stopping running process...
+if not exist "%DIST_DIR%\%APP_NAME%.exe" (
+    echo [ERROR] Built executable was not found after build: %DIST_DIR%\%APP_NAME%.exe
+    exit /b 1
+)
+
+echo [2/5] Stopping running process...
 taskkill /f /im %APP_NAME%.exe >nul 2>&1
-timeout /t 1 /nobreak >nul
+powershell -NoProfile -Command "Start-Sleep -Seconds 1"
 powershell -NoProfile -Command "if (Get-Process -Name '%APP_NAME%' -ErrorAction SilentlyContinue) { exit 1 }"
 if errorlevel 1 (
     echo [ERROR] %APP_NAME% is still running. Close it and run package.bat again.
     exit /b 1
 )
 
-echo [2/4] Creating portable folder...
+echo [3/5] Creating portable folder...
 mkdir "%PORTABLE_ROOT%" >nul 2>&1
 if exist "%PORTABLE_DIR%" rmdir /s /q "%PORTABLE_DIR%"
 robocopy "%DIST_DIR%" "%PORTABLE_DIR%" /E /XD "%DIST_DIR%\logs" "%DIST_DIR%\_internal\logs" /NFL /NDL /NJH /NJS /NP >nul
@@ -41,7 +47,7 @@ if errorlevel 8 (
 
 if not exist "%PORTABLE_DIR%\logs" mkdir "%PORTABLE_DIR%\logs"
 
-echo [3/4] Writing portable launcher...
+echo [4/5] Writing portable launcher...
 (
 echo @echo off
 echo setlocal
@@ -54,7 +60,7 @@ echo start "" "%%EXE%%"
 echo endlocal
 ) > "%PORTABLE_DIR%\run.bat"
 
-echo [4/4] Creating zip package...
+echo [5/5] Creating zip package...
 set "ZIP_CREATED=0"
 for /l %%R in (1,1,5) do (
     if exist "%ZIP_FILE%" del /f /q "%ZIP_FILE%" >nul 2>&1

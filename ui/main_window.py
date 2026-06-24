@@ -26,7 +26,7 @@ from PyQt5.QtWidgets import (
 
 from PyQt5.QtCore import Qt, QTimer, QUrl, QByteArray
 
-from PyQt5.QtGui import QDesktopServices, QKeySequence
+from PyQt5.QtGui import QDesktopServices, QKeySequence, QPainter, QColor, QFont
 
 from typing import Dict, List
 
@@ -64,6 +64,28 @@ from core.remote_session_keys import is_remote_session_key, remote_session_serve
 
 from core.log_manager import LogManager
 from core.remote_server_manager import RemoteServerManager
+
+
+class EmptyStateTabWidget(QTabWidget):
+    """Tab widget that shows a quiet product mark when no sessions are open."""
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        if self.count() != 0:
+            return
+
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.TextAntialiasing, True)
+        painter.setPen(QColor("#c5ccd6"))
+
+        font = QFont(self.font())
+        font.setPointSize(50)
+        font.setWeight(QFont.DemiBold)
+        painter.setFont(font)
+
+        rect = self.rect()
+        painter.drawText(rect, Qt.AlignCenter, "TermLink")
+
 
 class MainWindow(QMainWindow):
 
@@ -257,7 +279,7 @@ class MainWindow(QMainWindow):
 
         # 标签页容器
 
-        self.tab_widget = QTabWidget()
+        self.tab_widget = EmptyStateTabWidget()
 
         self.tab_widget.setTabsClosable(True)
         self.tab_widget.setStyleSheet("""
@@ -356,19 +378,39 @@ class MainWindow(QMainWindow):
 
             panel.refresh()
 
+    def _session_display_name(self, key, config):
+
+        base_name = config.name if config and getattr(config, "name", "") else ""
+
+        protocol_prefixes = (
+            ("ssh://", "SSH"),
+            ("telnet://", "Telnet"),
+            ("rawtcp://", "Raw TCP"),
+        )
+
+        for prefix, label in protocol_prefixes:
+
+            if key.startswith(prefix):
+
+                address = key[len(prefix):]
+
+                return f"{label}: {base_name or address}"
+
+        return base_name or key
+
     def _build_connection_snapshot(self):
 
         sessions = []
 
         for key, (worker, _tab, config) in self._sessions.items():
 
-            name = config.name if config and config.name else key
+            name = self._session_display_name(key, config)
 
             if is_remote_session_key(key):
 
                 kind = "remote"
 
-            elif key.startswith("ssh://") or key.startswith("telnet://"):
+            elif key.startswith(("ssh://", "telnet://", "rawtcp://")):
 
                 kind = "network"
 
@@ -779,6 +821,22 @@ See CHANGELOG.md in the project root for the full changelog.
 
             self._create_network_session(config)
 
+    def _add_raw_tcp_connection(self):
+
+        """Add a raw TCP terminal connection."""
+
+        from .ssh_dialog import SSHConnectDialog
+
+        dialog = SSHConnectDialog(self)
+
+        dialog.type_combo.setCurrentIndex(2)
+
+        if dialog.exec_() == QDialog.Accepted:
+
+            config = dialog.get_config()
+
+            self._create_network_session(config)
+
     def _add_remote_serial_connection(self):
 
         self._serial_access_controller.show_remote_connection()
@@ -1176,7 +1234,7 @@ See CHANGELOG.md in the project root for the full changelog.
         QTimer.singleShot(0, self._apply_dock_corner_policy)
         self.resizeDocks(
             [self.command_set_panel],
-            [max(45, int(getattr(self.app_config, "command_sets_panel_width", 110)))],
+            [max(45, int(getattr(self.app_config, "command_sets_panel_width", 140)))],
             Qt.Horizontal,
         )
 

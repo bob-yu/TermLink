@@ -45,11 +45,12 @@ TermLink/
   main.py                 Application entry point
   config.example.json     Tracked default configuration template
   requirements.txt        Python dependencies
-  run.bat                 Windows source/portable launcher
-  build.bat               Windows portable package helper
+  dev.bat / dev.sh        Run from Python source for development
+  run.bat / run.sh        Run the packaged build from dist/
+  build.bat / build.sh    Build a PyInstaller executable directory
+  package.bat / package.sh Build and create a portable archive
   build.py                Cross-platform PyInstaller helper
-  build.sh                Linux tar.gz/deb packaging helper
-  clean.bat               Local build/log cleanup helper
+  clean.bat / clean.sh    Local build/log cleanup helper
   TermLink.spec           PyInstaller spec
 
   core/                   Serial, SSH/Telnet, remote access, logging, protocol, and terminal core
@@ -146,19 +147,66 @@ python -m automation.mcp_server --host 127.0.0.1 --port 56337
 
 See `docs/automation.md` for the full CLI and MCP reference.
 
-## Build
+## Build And Run
 
-Windows portable package:
+Development run from source:
+
+```bat
+dev.bat
+```
+
+```bash
+./dev.sh
+```
+
+Build a packaged executable directory:
 
 ```bat
 build.bat
 ```
 
-Build script roles:
+```bash
+./build.sh
+```
 
-- `build.bat`: Windows portable package workflow. Reuses `dist/` or an installed package when possible, otherwise builds with `TermLink.spec`.
+Run the packaged executable from `dist/TermLink`:
+
+```bat
+run.bat
+```
+
+```bash
+./run.sh
+```
+
+Create a portable release archive. Package scripts build first, then archive the fresh build:
+
+```bat
+package.bat
+```
+
+```bash
+./package.sh
+```
+
+Clean generated build output:
+
+```bat
+clean.bat
+```
+
+```bash
+./clean.sh
+```
+
+Script roles:
+
+- `dev.bat` / `dev.sh`: run `main.py` directly with local Python for fast UI and logic iteration.
+- `build.bat` / `build.sh`: build `dist/TermLink` with `TermLink.spec`.
+- `run.bat` / `run.sh`: run the already built executable from `dist/TermLink`.
+- `package.bat` / `package.sh`: run build first, then create a portable zip/tar.gz under `portable/`.
+- `clean.bat` / `clean.sh`: remove generated build/package output; use `all` to also remove logs.
 - `build.py`: Cross-platform Python helper for PyInstaller directory or one-file builds.
-- `build.sh`: Linux shell workflow for directory builds, one-file builds, tar.gz release packages, and `.deb` packages.
 
 PyInstaller directly:
 

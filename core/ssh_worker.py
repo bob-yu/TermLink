@@ -36,6 +36,7 @@ class ConnectionType(Enum):
     """连接类型"""
     SSH = auto()
     TELNET = auto()
+    RAW_TCP = auto()
 
 
 class WorkerState(Enum):
@@ -68,6 +69,16 @@ class TelnetConfig:
     password: str = ""
     name: str = ""
     connection_type: ConnectionType = ConnectionType.TELNET
+
+
+@dataclass
+class RawTcpConfig:
+    """Raw TCP terminal configuration."""
+    host: str
+    port: int = 2323
+    name: str = ""
+    encoding: str = "utf-8"
+    connection_type: ConnectionType = ConnectionType.RAW_TCP
 
 
 class SSHWorker(QObject):
@@ -480,3 +491,149 @@ class TelnetWorker(QObject):
     def is_available() -> bool:
         """检查 Telnet 功能是否可用"""
         return True  # 始终可用（有 SimpleTelnet 兜底）
+
+
+class RawTcpWorker(QObject):
+    """Raw TCP terminal worker with the same interface as serial/network workers."""
+
+    data_received = pyqtSignal(str)
+    state_changed = pyqtSignal(WorkerState)
+    error_occurred = pyqtSignal(str)
+
+    def __init__(
+        self,
+        config: RawTcpConfig,
+        log_dir: str = "logs",
+        log_enabled: bool = True,
+        log_timestamp: bool = True,
+    ):
+        super().__init__()
+        self.config = config
+        self._state = WorkerState.STOPPED
+        self._running = False
+        self._thread: Optional[threading.Thread] = None
+        self._sock: Optional[socket.socket] = None
+        self._auto_reconnect = False
+        self._reconnect_interval = 5
+        self._data_bus = get_data_bus()
+        self._source_id = f"rawtcp://{config.host}:{config.port}"
+        self._logger = SerialLogger(
+            config.name or f"rawtcp_{config.host}_{config.port}",
+            log_dir,
+            enabled=log_enabled,
+            add_timestamp=log_timestamp,
+        )
+        if log_enabled:
+            self._data_bus.register_log_handler(
+                self._source_id,
+                lambda data: self._logger.write(data),
+            )
+
+    @property
+    def state(self) -> WorkerState:
+        return self._state
+
+    @property
+    def is_connected(self) -> bool:
+        return self._state == WorkerState.CONNECTED
+
+    @property
+    def log_filepath(self) -> str:
+        return self._logger.filepath
+
+    @property
+    def source_id(self) -> str:
+        return self._source_id
+
+    def set_auto_reconnect(self, enabled: bool, interval: float = 5):
+        self._auto_reconnect = enabled
+        self._reconnect_interval = interval
+
+    def start(self):
+        if self._running:
+            return
+        self._running = True
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def stop(self):
+        self._running = False
+        self._close_connection()
+        if self._thread:
+            self._thread.join(timeout=2)
+            self._thread = None
+        self._logger.close()
+        self._data_bus.unregister_log_handler(self._source_id)
+        self._set_state(WorkerState.STOPPED)
+
+    def write(self, data: str):
+        if not self._sock or self._state != WorkerState.CONNECTED:
+            return
+        try:
+            self._sock.sendall(data.encode(self.config.encoding, errors="replace"))
+        except Exception as exc:
+            self.error_occurred.emit(f"Send failed: {exc}")
+            self._set_state(WorkerState.ERROR)
+
+    def send_command(self, command: str):
+        if not command.endswith("\n"):
+            command += "\n"
+        self.write(command)
+
+    def _run(self):
+        while self._running:
+            try:
+                self._connect()
+                self._receive_loop()
+            except Exception as exc:
+                if self._running:
+                    self.error_occurred.emit(f"Connection error: {exc}")
+                    self._set_state(WorkerState.ERROR)
+
+            self._close_connection()
+
+            if self._running and self._auto_reconnect:
+                self._set_state(WorkerState.DISCONNECTED)
+                time.sleep(self._reconnect_interval)
+            else:
+                break
+
+    def _connect(self):
+        self._set_state(WorkerState.CONNECTING)
+        sock = socket.create_connection((self.config.host, self.config.port), timeout=10)
+        sock.settimeout(0.1)
+        self._sock = sock
+        self._set_state(WorkerState.CONNECTED)
+
+    def _receive_loop(self):
+        while self._running and self._sock:
+            try:
+                data = self._sock.recv(4096)
+                if not data:
+                    break
+                text = data.decode(self.config.encoding, errors="replace")
+                self._data_bus.publish(self._source_id, text)
+                self.data_received.emit(text)
+            except socket.timeout:
+                continue
+            except OSError as exc:
+                if self._running:
+                    self.error_occurred.emit(f"Receive failed: {exc}")
+                break
+
+    def _close_connection(self):
+        if self._sock:
+            try:
+                self._sock.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            try:
+                self._sock.close()
+            except OSError:
+                pass
+            self._sock = None
+
+    def _set_state(self, state: WorkerState):
+        if self._state != state:
+            self._state = state
+            self.state_changed.emit(state)

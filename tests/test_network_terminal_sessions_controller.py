@@ -27,6 +27,13 @@ class FakeTelnetConfig:
         self.name = name
 
 
+class FakeRawTcpConfig:
+    def __init__(self, host="10.0.0.4", port=2323, name=""):
+        self.host = host
+        self.port = port
+        self.name = name
+
+
 class FakeWorker:
     def __init__(self, config, *_args, **_kwargs):
         self.config = config
@@ -109,8 +116,10 @@ def load_controller_module():
 
     ssh_worker = types.ModuleType("core.ssh_worker")
     ssh_worker.SSHConfig = FakeSSHConfig
+    ssh_worker.RawTcpConfig = FakeRawTcpConfig
     ssh_worker.SSHWorker = FakeWorker
     ssh_worker.TelnetWorker = FakeWorker
+    ssh_worker.RawTcpWorker = FakeWorker
     sys.modules["core.ssh_worker"] = ssh_worker
 
     ui_module = types.ModuleType("ui")
@@ -138,7 +147,7 @@ class NetworkTerminalSessionControllerTest(unittest.TestCase):
 
         self.assertIn("ssh://10.0.0.2:22", self.window._sessions)
         worker, _tab, config = self.window._sessions["ssh://10.0.0.2:22"]
-        self.assertIsNone(config)
+        self.assertIsInstance(config, FakeSSHConfig)
         self.assertTrue(worker.started)
         self.assertEqual(worker.reconnect, (True, 5))
         self.assertEqual(self.window.tab_widget.tabs[0][1], "SSH:10.0.0.2")
@@ -148,6 +157,12 @@ class NetworkTerminalSessionControllerTest(unittest.TestCase):
 
         self.assertIn("telnet://10.0.0.3:23", self.window._sessions)
         self.assertEqual(self.window.tab_widget.tabs[0][1], "Telnet:10.0.0.3")
+
+    def test_creates_raw_tcp_session(self):
+        self.controller.create_session(FakeRawTcpConfig())
+
+        self.assertIn("rawtcp://10.0.0.4:2323", self.window._sessions)
+        self.assertEqual(self.window.tab_widget.tabs[0][1], "Raw TCP:10.0.0.4")
 
 
 if __name__ == "__main__":

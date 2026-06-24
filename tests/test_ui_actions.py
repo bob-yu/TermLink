@@ -84,6 +84,7 @@ class FakeWindow:
     def close(self): pass
     def _add_ssh_connection(self): pass
     def _add_telnet_connection(self): pass
+    def _add_raw_tcp_connection(self): pass
     def _add_remote_serial_connection(self): pass
     def _show_serial_remote_access_control(self):
         self.access_control_opened = True
@@ -101,6 +102,7 @@ class MainWindowActionsTest(unittest.TestCase):
         self.assertEqual(actions.scan_ports.shortcut(), "Ctrl+R")
         self.assertEqual(actions.add_serial.text(), "Serial")
         self.assertEqual(actions.add_serial.shortcut(), "Ctrl+N")
+        self.assertEqual(actions.add_raw_tcp.text(), "Raw TCP")
         self.assertEqual(actions.access_settings.text(), "Serial Remote Access Settings")
         self.assertEqual(actions.access_control.text(), "Serial Remote Access Control")
         self.assertEqual(actions.open_docs.shortcut(), "F1")

@@ -4,7 +4,7 @@ from ui.serial_tab import SerialTab
 
 
 class NetworkTerminalSessionController:
-    """Creates SSH/Telnet terminal sessions owned by MainWindow."""
+    """Creates network terminal sessions owned by MainWindow."""
 
     def __init__(self, main_window):
         self._main_window = main_window
@@ -34,20 +34,31 @@ class NetworkTerminalSessionController:
             tab.terminal.set_highlight_rules(getattr(app_config, "highlight_rules", []))
         index = self._main_window.tab_widget.addTab(tab, tab_name)
         self._main_window.tab_widget.setCurrentIndex(index)
-        self._main_window._sessions[session_key] = (worker, tab, None)
+        self._main_window._sessions[session_key] = (worker, tab, config)
 
         worker.start()
         self._main_window._refresh_connection_panel()
         self._main_window.statusbar.showMessage(f"Added connection: {tab_name}")
 
     def _build_worker(self, config):
-        from core.ssh_worker import SSHConfig, SSHWorker, TelnetWorker
+        from core.ssh_worker import RawTcpConfig, RawTcpWorker, SSHConfig, SSHWorker, TelnetWorker
 
         app_config = self._main_window.app_config
         if isinstance(config, SSHConfig):
             session_key = f"ssh://{config.host}:{config.port}"
             tab_name = config.name or f"SSH:{config.host}"
             worker = SSHWorker(
+                config,
+                app_config.log_dir,
+                log_enabled=app_config.log_enabled,
+                log_timestamp=app_config.log_timestamp,
+            )
+            return session_key, tab_name, worker
+
+        if isinstance(config, RawTcpConfig):
+            session_key = f"rawtcp://{config.host}:{config.port}"
+            tab_name = config.name or f"Raw TCP:{config.host}"
+            worker = RawTcpWorker(
                 config,
                 app_config.log_dir,
                 log_enabled=app_config.log_enabled,

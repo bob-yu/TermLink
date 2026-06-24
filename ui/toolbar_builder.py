@@ -63,6 +63,7 @@ def _add_connection_menu(window, toolbar: QToolBar):
     add_connection_menu.addAction(window.actions.add_serial)
     add_connection_menu.addAction(window.actions.add_ssh)
     add_connection_menu.addAction(window.actions.add_telnet)
+    add_connection_menu.addAction(window.actions.add_raw_tcp)
     add_connection_menu.addAction(window.actions.add_remote_serial)
 
     button = QToolButton(window)

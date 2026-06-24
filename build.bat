@@ -12,7 +12,7 @@ echo.
 
 echo [1/3] Stopping running process...
 taskkill /f /im %APP_NAME%.exe >nul 2>&1
-timeout /t 1 /nobreak >nul
+powershell -NoProfile -Command "Start-Sleep -Seconds 1"
 powershell -NoProfile -Command "if (Get-Process -Name '%APP_NAME%' -ErrorAction SilentlyContinue) { exit 1 }"
 if errorlevel 1 (
     echo [ERROR] %APP_NAME% is still running. Close it and run build.bat again.
@@ -23,7 +23,7 @@ echo [2/3] Cleaning build output...
 if exist "dist" rmdir /s /q "dist"
 if exist "build" rmdir /s /q "build"
 
-echo [3/3] Building executable...
+echo [3/3] Building executable package...
 python -m PyInstaller --noconfirm TermLink.spec
 if errorlevel 1 (
     echo [ERROR] PyInstaller build failed.
