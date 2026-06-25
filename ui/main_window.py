@@ -14,7 +14,7 @@ import os
 
 from PyQt5.QtWidgets import (
 
-    QMainWindow, QTabWidget,
+    QMainWindow,
 
     QMessageBox, QStatusBar,
 
@@ -26,7 +26,7 @@ from PyQt5.QtWidgets import (
 
 from PyQt5.QtCore import Qt, QTimer, QUrl, QByteArray
 
-from PyQt5.QtGui import QDesktopServices, QKeySequence, QPainter, QColor, QFont
+from PyQt5.QtGui import QDesktopServices, QKeySequence
 
 from typing import Dict, List
 
@@ -44,6 +44,7 @@ from .actions import MainWindowActions
 from .connection_snapshot import AccessSnapshot, ConnectionSnapshot, SessionSnapshot
 from .icon_provider import icon
 from .session_config_selector import serial_port_configs_to_save
+from .session_workspace import SessionWorkspace
 from .toolbar_builder import build_main_toolbar
 
 from .controllers import (
@@ -65,27 +66,6 @@ from core.remote_session_keys import is_remote_session_key, remote_session_serve
 
 from core.log_manager import LogManager
 from core.remote_server_manager import RemoteServerManager
-
-
-class EmptyStateTabWidget(QTabWidget):
-    """Tab widget that shows a quiet product mark when no sessions are open."""
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        if self.count() != 0:
-            return
-
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.TextAntialiasing, True)
-        painter.setPen(QColor("#c5ccd6"))
-
-        font = QFont(self.font())
-        font.setPointSize(50)
-        font.setWeight(QFont.DemiBold)
-        painter.setFont(font)
-
-        rect = self.rect()
-        painter.drawText(rect, Qt.AlignCenter, "TermLink")
 
 
 class MainWindow(QMainWindow):
@@ -281,41 +261,9 @@ class MainWindow(QMainWindow):
 
         # 标签页容器
 
-        self.tab_widget = EmptyStateTabWidget()
+        self.tab_widget = SessionWorkspace(self)
 
         self.tab_widget.setTabsClosable(True)
-        self.tab_widget.setStyleSheet("""
-            QTabWidget::pane {
-                border: none;
-                border-top: 1px solid #d8dee4;
-            }
-            QTabBar::tab {
-                background: #f1f5f9;
-                border: 1px solid #d8dee4;
-                border-bottom: none;
-                color: #24292f;
-                padding: 6px 28px 6px 10px;
-                min-height: 22px;
-            }
-            QTabBar::tab:selected {
-                background: #ffffff;
-                border-top: 2px solid #0969da;
-            }
-            QTabBar::tab:hover:!selected {
-                background: #eef2f7;
-            }
-            QTabBar::close-button {
-                image: url(ui/resources/icons/x.svg);
-                subcontrol-position: right;
-                width: 14px;
-                height: 14px;
-                margin-right: 7px;
-            }
-            QTabBar::close-button:hover {
-                background: #e2e8f0;
-                border-radius: 4px;
-            }
-        """)
 
         self.tab_widget.tabCloseRequested.connect(self._close_tab)
 

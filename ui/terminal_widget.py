@@ -71,7 +71,6 @@ class TerminalView(QWidget):
 
         # Scrollback history.
         self._scrollback = ScrollbackBuffer(scrollback_lines)
-        self._prev_screen_lines = []
 
         self._scroll_offset = 0
         self._auto_scroll = True
@@ -85,6 +84,10 @@ class TerminalView(QWidget):
         self._update_timer.setSingleShot(True)
         self._update_timer.timeout.connect(self._do_deferred_update)
         self._update_interval = 16  # About 60 fps.
+        self._layout_refresh_timer = QTimer()
+        self._layout_refresh_timer.setSingleShot(True)
+        self._layout_refresh_timer.timeout.connect(self._apply_pending_layout)
+        self._pending_layout_size = None
 
         # Cursor.
         self._cursor_visible = True
@@ -190,9 +193,25 @@ class TerminalView(QWidget):
     def resizeEvent(self, event):
         """Terminal widget helper."""
         super().resizeEvent(event)
+        self.refresh_layout(deferred=True)
 
-        new_width = event.size().width()
-        new_height = event.size().height()
+    def refresh_layout(self, deferred: bool = True):
+        """Refresh terminal geometry after tab split, merge, or reparent."""
+        self._pending_layout_size = self.size()
+        if deferred:
+            self._layout_refresh_timer.start(25)
+            return
+        self._apply_pending_layout()
+
+    def _apply_pending_layout(self):
+        size = self._pending_layout_size or self.size()
+        self._pending_layout_size = None
+
+        new_width = size.width()
+        new_height = size.height()
+
+        if new_width <= 0 or new_height <= 0:
+            return
 
         new_cols = max(40, (new_width - 4) // self._char_width)
         new_rows = max(10, (new_height - 4) // self._char_height)
@@ -205,55 +224,31 @@ class TerminalView(QWidget):
         self._buffer_dirty = True
         self._rebuild_highlight_matches()
         self._rebuild_watch_highlight_matches()
+        self.update()
 
     def _resize_terminal(self, new_cols: int, new_rows: int):
         """Terminal widget helper."""
-        current_lines = self._resize_snapshot_lines(new_rows)
-        align_bottom = len(self._scrollback) > 0
-        old_rows = self.rows
-        old_cursor_y = getattr(self._screen.cursor, "y", 0)
-        cursor_x = min(getattr(self._screen.cursor, "x", 0), new_cols - 1)
-        if align_bottom:
-            cursor_bottom_offset = max(0, old_rows - 1 - old_cursor_y)
-            cursor_y = max(0, min(new_rows - 1, new_rows - 1 - cursor_bottom_offset))
-        else:
-            cursor_y = min(old_cursor_y, new_rows - 1)
-
         self.cols, self.rows = new_cols, new_rows
 
-        # Rebuild the pyte screen at the new terminal size.
-        self._screen = self._make_screen(new_cols, new_rows)
-        self._screen.set_mode(pyte.modes.LNM)
-        self._stream = pyte.Stream(self._screen)
-        self._suppress_scrollback_capture = True
-        try:
-            self._restore_screen_snapshot(current_lines, cursor_x, cursor_y, align_bottom)
-        finally:
-            self._suppress_scrollback_capture = False
-
-        # Reset the screen snapshot after resizing.
-        self._prev_screen_lines = []
-
+        # Keep pyte's screen model intact during split/merge/tab drag resizes.
+        # Replaying visible text into a new screen can move the cursor and create
+        # phantom blank lines because control state is lost.
+        self._screen.resize(lines=new_rows, columns=new_cols)
+        self._screen.cursor.x = min(getattr(self._screen.cursor, "x", 0), new_cols - 1)
+        self._screen.cursor.y = min(getattr(self._screen.cursor, "y", 0), new_rows - 1)
+        self._screen.set_margins()
+        if self._auto_scroll:
+            self._scroll_offset = 0
         self._buffer_dirty = True
 
     def _screen_snapshot_lines(self) -> list:
         return [self._get_screen_line_text(y) for y in range(self._screen.lines)]
 
-    def _resize_snapshot_lines(self, target_rows: int) -> list:
-        screen_lines = self._screen_snapshot_lines()
-        needed_history = max(0, target_rows - len(screen_lines))
-        history_count = len(self._scrollback)
-        history_start = max(0, history_count - needed_history)
-        history_lines = self._scrollback.get_lines(history_start, history_count - history_start)
-        return (history_lines + screen_lines)[-target_rows:]
-
-    def _restore_screen_snapshot(self, lines: list, cursor_x: int, cursor_y: int, align_bottom: bool = True):
+    def _restore_screen_snapshot(self, lines: list, cursor_x: int, cursor_y: int):
         visible_lines = lines[-self.rows:]
         if not visible_lines:
             return
-        top_padding = max(0, self.rows - len(visible_lines)) if align_bottom else 0
-        padded_lines = [""] * top_padding + visible_lines
-        text = "\r\n".join(line[:self.cols] for line in padded_lines)
+        text = "\r\n".join(line[:self.cols] for line in visible_lines)
         if text:
             self._stream.feed(text)
         self._screen.cursor.x = min(cursor_x, self.cols - 1)
@@ -321,7 +316,6 @@ class TerminalView(QWidget):
         self._screen = self._make_screen(self.cols, self.rows)
         self._screen.set_mode(pyte.modes.LNM)
         self._stream = pyte.Stream(self._screen)
-        self._prev_screen_lines = []
         self._buffer_dirty = True
 
     def _leave_alternate_screen(self):
@@ -334,10 +328,9 @@ class TerminalView(QWidget):
             lines, cursor_x, cursor_y = saved
             self._suppress_scrollback_capture = True
             try:
-                self._restore_screen_snapshot(lines, cursor_x, cursor_y, align_bottom=False)
+                self._restore_screen_snapshot(lines, cursor_x, cursor_y)
             finally:
                 self._suppress_scrollback_capture = False
-        self._prev_screen_lines = []
         self._buffer_dirty = True
 
     def _do_deferred_update(self):
@@ -366,49 +359,6 @@ class TerminalView(QWidget):
         except Exception as e:
             print(f"Terminal feed error: {e}")
 
-    def _detect_and_save_scrolled_lines(self, screen_before: list, screen_after: list):
-        """Terminal widget helper."""
-        if not screen_before:
-            return
-
-        # Find the first previous screen line in the current screen.
-        first_line_before = screen_before[0]
-
-        match_index = -1
-        for i, line in enumerate(screen_after):
-            if line == first_line_before and first_line_before.strip():
-                match_index = i
-                break
-
-        if match_index > 0:
-            # Repeated lines make this heuristic unreliable.
-            pass
-
-        # Prefer the full-screen comparison heuristic.
-        scroll_count = self._calculate_scroll_count(screen_before, screen_after)
-
-        if scroll_count > 0:
-            for i in range(scroll_count):
-                if i < len(screen_before):
-                    line = screen_before[i]
-                    self._scrollback.append(line)
-
-    def _calculate_scroll_count(self, screen_before: list, screen_after: list) -> int:
-        """Terminal widget helper."""
-        if not screen_before or not screen_after:
-            return 0
-
-        for scroll in range(1, len(screen_before)):
-            compare_lines = min(len(screen_after), len(screen_before) - scroll)
-            if compare_lines <= 0:
-                continue
-            before_tail = screen_before[scroll:scroll + compare_lines]
-            after_head = screen_after[:compare_lines]
-            if before_tail == after_head:
-                return scroll
-
-        return 0
-
     def _get_screen_line_text(self, y: int) -> str:
         """Terminal widget helper."""
         if y < 0 or y >= self._screen.lines:
@@ -425,7 +375,6 @@ class TerminalView(QWidget):
         self._screen.reset()
         self._alternate_screen = None
         self._scrollback.clear()
-        self._prev_screen_lines = []
         self._scroll_offset = 0
         self._auto_scroll = True
         self._watch_matches = []
@@ -497,6 +446,10 @@ class TerminalView(QWidget):
 
     def paintEvent(self, event):
         """Terminal widget helper."""
+        if self._buffer is None:
+            self.refresh_layout(deferred=False)
+        if self._buffer is None:
+            return
         if self._buffer_dirty:
             self._render_buffer()
 
@@ -1361,6 +1314,9 @@ class TerminalWidget(QWidget):
 
     def scroll_to_bottom_force(self):
         self._view.scroll_to_bottom()
+
+    def refresh_layout(self):
+        self._view.refresh_layout()
 
     def set_scroll_area(self, scroll_area):
         pass
